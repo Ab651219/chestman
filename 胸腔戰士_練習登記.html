@@ -1,0 +1,2193 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🐉 胸腔戰士划龍舟</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════
+   設定你的 Firebase 資料：
+   1. 到 https://console.firebase.google.com
+   2. 建立新專案（免費）
+   3. 新增 Realtime Database（測試模式）
+   4. 把下方 FIREBASE_CONFIG 填入你的設定
+   ══════════════════════════════════════════ */
+:root{
+  --bg:#fdf6ee;--bg2:#fff;--bg3:#fef0e0;
+  --border:#e8d5b8;--border2:#d4b896;
+  --text:#2a1a08;--text2:#6b4a28;--text3:#b09070;
+  --accent:#c0500a;
+  --gold:#d4870a;--gold-bg:rgba(212,135,10,.1);--gold-bd:rgba(212,135,10,.3);
+  --green:#2a8040;--green-bg:rgba(42,128,64,.1);--green-bd:rgba(42,128,64,.3);
+  --red:#c02020;--orange:#c06010;
+  --sh:0 2px 10px rgba(100,50,0,.12);--sh2:0 4px 20px rgba(100,50,0,.2);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+#root{max-width:500px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+
+/* ── Header ── */
+.hdr{background:linear-gradient(135deg,#7a2000,#c04010 50%,#7a2000);padding:13px 16px 10px;border-bottom:3px solid var(--gold);position:sticky;top:0;z-index:100;box-shadow:var(--sh2)}
+.hdr-row{display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:9px}
+.brand-icon{font-size:26px}
+.brand-name{font-size:16px;font-weight:900;color:#fff}
+.sync-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#4ade80;margin-left:6px;vertical-align:middle}
+.sync-dot.syncing{background:#fbbf24;animation:blink .8s infinite}
+.sync-dot.offline{background:#f87171}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.rbtns{display:flex;gap:5px}
+.rbtn{font-size:11px;padding:5px 11px;border-radius:20px;border:1px solid rgba(255,255,255,.4);cursor:pointer;font-family:inherit;background:rgba(255,255,255,.15);color:#fff;font-weight:600}
+.rbtn.coach-on{border-color:#ffd080;color:#ffd080;background:rgba(255,208,128,.15)}
+.rbtn.admin-on{border-color:#ffaa40;color:#ffaa40;background:rgba(255,170,64,.15)}
+
+/* ── Tabs ── */
+.tabs{display:flex;background:#fff;border-bottom:2px solid var(--border);box-shadow:0 2px 6px rgba(100,50,0,.08)}
+.tab{flex:1;padding:11px 2px;text-align:center;font-size:11px;font-weight:700;color:var(--text3);cursor:pointer;border:none;background:none;font-family:inherit;white-space:nowrap}
+.tab.active{color:var(--accent);border-bottom:2px solid var(--accent)}
+.tab.hidden{display:none}
+.content{flex:1;padding:14px;overflow-y:auto;background:var(--bg)}
+
+/* ── Shared ── */
+.pg-title{font-size:19px;font-weight:900;color:var(--accent);margin-bottom:3px}
+.pg-sub{font-size:12px;color:var(--text2);margin-bottom:16px}
+.sec-ttl{font-size:13px;font-weight:700;color:var(--accent);margin-bottom:9px}
+.lbl{font-size:12px;color:var(--text2);margin-bottom:5px;display:block;font-weight:600}
+.ig{margin-bottom:13px}
+.inp{width:100%;background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;outline:none}
+.inp:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(192,80,10,.1)}
+.rbg{display:flex;gap:6px;flex-wrap:wrap}
+.rb{padding:8px 14px;border-radius:20px;border:1.5px solid var(--border);background:#fff;color:var(--text2);cursor:pointer;font-size:13px;font-family:inherit;font-weight:500}
+.rb.sel{border-color:var(--accent);color:var(--accent);background:rgba(192,80,10,.07);font-weight:700}
+
+/* ── Session rows ── */
+.srow{padding:12px 14px;background:#fff;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;box-shadow:0 1px 5px rgba(0,100,200,.05);margin-bottom:7px}
+.srow.chk{border-color:var(--accent);background:rgba(192,80,10,.04)}
+.srow-in{display:flex;align-items:center;justify-content:space-between}
+.sd{font-size:14px;font-weight:700}
+.st{font-size:11px;color:var(--text2);margin-top:1px}
+.ntag{font-size:10px;background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-bd);padding:2px 8px;border-radius:20px;display:inline-block;margin-top:3px;font-weight:600}
+.dlbadge{font-size:10px;margin-top:3px;font-weight:500}
+.dl-open{color:var(--green)}.dl-locked{color:var(--red)}.dl-soon{color:var(--orange)}
+.sub-btn{width:100%;background:linear-gradient(135deg,#b04008,#e05010);color:#fff;font-size:15px;font-weight:800;padding:14px;border-radius:10px;border:none;cursor:pointer;font-family:inherit;margin-top:16px;box-shadow:0 4px 12px rgba(192,80,10,.3)}
+
+/* ── Stats ── */
+.stat-row{display:flex;gap:8px;margin-bottom:13px}
+.stat-box{flex:1;background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:10px;text-align:center;box-shadow:0 1px 5px rgba(0,100,200,.05)}
+.sn{font-size:21px;font-weight:900;color:var(--accent)}
+.sl{font-size:10px;color:var(--text2);font-weight:600}
+
+/* ── Overview cards ── */
+.ov-card{background:#fff;border:1.5px solid var(--border);border-radius:10px;margin-bottom:9px;overflow:hidden;box-shadow:0 1px 5px rgba(0,100,200,.05)}
+.ov-head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;cursor:pointer}
+.ov-head:active{background:var(--bg3)}
+.ov-date{font-size:15px;font-weight:700}
+.ov-meta{font-size:11px;color:var(--text2);margin-top:1px}
+.ov-cnt{text-align:right}
+.ov-n{font-size:22px;font-weight:900;color:var(--accent)}
+.ov-nl{font-size:10px;color:var(--text2)}
+.ov-body{padding:0 14px 14px;border-top:1.5px solid var(--border)}
+.pub-banner{background:var(--green-bg);border:1.5px solid var(--green-bd);border-radius:8px;padding:9px 13px;font-size:12px;color:var(--green);margin-top:10px;font-weight:600}
+
+/* ── Roster table ── */
+.roster-wrap{margin-top:10px}
+.roster-table{width:100%;border-collapse:collapse;font-size:12px;background:#fff;border-radius:8px;overflow:hidden;border:1.5px solid var(--border)}
+.roster-table th{padding:7px 8px;font-weight:700;font-size:11px;text-align:center;border-bottom:1.5px solid var(--border)}
+.roster-table td{padding:6px 8px;text-align:center;border-bottom:1px solid var(--border);vertical-align:middle}
+.roster-table tr:last-child td{border-bottom:none}
+.roster-table .th-l{background:rgba(0,160,96,.1);color:#006a3a}
+.roster-table .th-r{background:rgba(0,100,220,.1);color:#004a9a}
+.roster-table .th-n{background:var(--bg3);color:var(--text2);width:32px}
+.roster-table .td-l{color:#006a3a;font-weight:600}
+.roster-table .td-r{color:#004a9a;font-weight:600}
+.roster-table .td-empty{color:var(--text3);font-size:11px}
+.roster-helm{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.roster-helm-item{display:flex;align-items:center;gap:4px;background:rgba(200,120,0,.08);border:1px solid rgba(200,120,0,.25);border-radius:6px;padding:4px 10px;font-size:12px;color:#8a4a00;font-weight:600}
+.roster-copy-btn{width:100%;background:linear-gradient(135deg,#005a28,#00a050);color:#fff;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px;box-shadow:0 3px 8px rgba(0,160,80,.25)}
+.roster-total{font-size:11px;color:var(--text3);text-align:right;margin-top:5px}
+
+/* ── Month nav ── */
+.month-nav{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;margin-bottom:12px;box-shadow:0 1px 4px rgba(100,50,0,.07)}
+.month-nav-btn{background:none;border:1.5px solid var(--border);border-radius:6px;padding:4px 12px;cursor:pointer;font-size:16px;color:var(--text2);font-family:inherit;line-height:1}
+.month-nav-btn:hover{background:var(--bg3)}
+.month-nav-lbl{font-size:15px;font-weight:900;color:var(--accent)}
+.month-nav-count{font-size:11px;color:var(--text3);font-weight:500}
+
+/* ── Batch preview ── */
+.batch-row{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg3);border-radius:8px;margin-bottom:5px;border:1.5px solid var(--border)}
+.batch-row.exists{opacity:.55;background:#efefef;border-color:#ddd}
+.batch-chk{width:18px;height:18px;accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+.batch-date{font-size:13px;font-weight:700;flex:1;min-width:100px}
+.batch-note-inp{background:#fff;border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:11px;font-family:inherit;color:var(--text);width:88px;flex-shrink:0}
+.batch-time-sel{background:#fff;border:1px solid var(--border);border-radius:6px;padding:4px 5px;font-size:11px;font-family:inherit;color:var(--text);flex-shrink:0}
+.batch-exists-tag{font-size:10px;color:var(--text3);background:#ddd;border-radius:4px;padding:2px 6px;flex-shrink:0;white-space:nowrap}
+.edit-row{margin-bottom:10px}
+
+/* ── My attendance ── */
+.att-on{background:rgba(192,80,10,.05);border-color:var(--accent)}
+.att-off{background:#f8f9fb;border-color:var(--border)}
+.att-locked{opacity:.5;background:#f5f7fa;border-color:var(--border)}
+.att-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:8px;border:1.5px solid var(--border);margin-bottom:7px}
+.att-info{flex:1}
+.att-date{font-size:13px;font-weight:700}
+.att-time{font-size:11px;color:var(--text2)}
+.atog{width:44px;height:24px;border-radius:12px;border:none;cursor:pointer;position:relative;flex-shrink:0;transition:background .2s}
+.atog.on{background:var(--accent)}.atog.off{background:#c8d8e8}
+.atog::after{content:'';position:absolute;top:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.atog.on::after{left:22px}.atog.off::after{left:2px}
+
+/* ── Coach ── */
+.boat-tabs{display:flex;gap:6px;margin-bottom:10px}
+.boat-tab{flex:1;padding:8px 4px;border-radius:8px;border:1.5px solid var(--border);background:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--text2);text-align:center}
+.boat-tab.b0.active{border-color:#c04010;color:#c04010;background:rgba(192,64,16,.08)}
+.boat-tab.b1.active{border-color:#2a8040;color:#2a8040;background:rgba(42,128,64,.08)}
+.boat-tab.b2.active{border-color:#806000;color:#806000;background:rgba(128,96,0,.08)}
+.pool-hdr{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+.pool-box{background:var(--bg3);border:1.5px solid var(--border);border-radius:8px;padding:8px;min-height:44px;display:flex;flex-wrap:wrap;gap:5px;align-content:flex-start}
+.pc{padding:5px 9px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid;transition:all .15s}
+.pc-l{background:rgba(0,160,96,.1);color:#006a3a;border-color:rgba(0,160,96,.3)}
+.pc-r{background:rgba(0,100,220,.1);color:#004a9a;border-color:rgba(0,100,220,.3)}
+.pc-h{background:rgba(200,120,0,.1);color:#8a4a00;border-color:rgba(200,120,0,.3)}
+.pc.active-pc{box-shadow:0 0 0 2.5px var(--accent);transform:scale(1.06)}
+.ri{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:7px;margin-bottom:3px;font-size:12px}
+.ri-0{background:rgba(0,100,220,.07);border:1px solid rgba(0,100,220,.15)}
+.ri-1{background:rgba(0,160,96,.07);border:1px solid rgba(0,160,96,.15)}
+.ri-2{background:rgba(200,120,0,.07);border:1px solid rgba(200,120,0,.15)}
+.ri-rm{background:transparent;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 3px}
+
+/* ── Boat diagram ── */
+.bd-outer{margin-top:10px}
+.bd-label{font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;display:inline-block;margin-bottom:6px}
+.bd-t0{color:#0055aa;background:rgba(0,85,170,.1);border:1.5px solid rgba(0,85,170,.25)}
+.bd-t1{color:#007a4a;background:rgba(0,122,74,.1);border:1.5px solid rgba(0,122,74,.25)}
+.bd-t2{color:#9a5800;background:rgba(154,88,0,.1);border:1.5px solid rgba(154,88,0,.25)}
+.bd-hull{background:linear-gradient(180deg,#c8daf0,#ddeafc 50%,#c8daf0);border-radius:14px;padding:8px 6px;border:2px solid #8ab0d8}
+.bd-row{display:flex;gap:5px;justify-content:center;margin-bottom:4px}
+.seat{border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:700;padding:4px 5px;text-align:center;word-break:break-all;line-height:1.3;min-height:38px;position:relative;cursor:pointer;transition:all .15s;user-select:none}
+.seat-pad{width:47%}.seat-spec{width:56%;min-height:30px}
+.se{background:rgba(255,255,255,.5);border:1.5px dashed rgba(100,140,200,.3);color:#a0b8d0}
+.se:active{background:rgba(255,208,0,.25);border-color:#f0b800}
+.sr{background:#cce0ff;border:1.5px solid #6aa0e0;color:#1a4a90}
+.sl2{background:#c8f0dc;border:1.5px solid #50b878;color:#1a6038}
+.sh{background:#fde8b0;border:1.5px solid #d0980a;color:#7a4e00}
+.seat.selected-seat{box-shadow:0 0 0 3px #f0b800;background:rgba(255,220,0,.35)!important;border-color:#f0b800!important;transform:scale(1.05)}
+.seat-num{position:absolute;top:2px;left:4px;font-size:8px;opacity:.55;color:inherit}
+.bd-div{width:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.bd-divline{width:2px;background:rgba(80,120,180,.2);height:100%;border-radius:1px}
+
+/* ── Action buttons ── */
+.act-btn{padding:9px 6px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;margin-bottom:6px}
+.a-auto{background:#e8f2ff;color:#0055aa;border:1.5px solid #b0d0f0}
+.a-preview{background:#edfaf3;color:#005a30;border:1.5px solid #90d0a8}
+.a-pub{background:linear-gradient(135deg,#00a060,#00c070);color:#fff;box-shadow:0 3px 10px rgba(0,160,96,.28)}
+.a-pub-done{background:#e0f8ee;color:#007a4a;border:1.5px solid #80d0a8}
+.line-out{background:#f0f4f8;border:1.5px solid #c0d0e0;border-radius:8px;padding:10px 12px;font-size:11px;line-height:1.9;white-space:pre-wrap;color:#2a3a50;margin-top:8px;font-family:monospace;max-height:240px;overflow-y:auto}
+.copy-btn{background:#00b900;color:#fff;border:none;padding:10px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;width:100%;margin-top:6px;font-weight:700}
+.copy-all-btn{background:var(--accent);color:#fff;border:none;padding:10px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;width:100%;margin-top:5px;font-weight:700}
+
+/* ── Admin ── */
+.adm-card{background:#fff;border:1.5px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden;box-shadow:0 1px 5px rgba(0,100,200,.05)}
+.adm-head{padding:12px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.adm-body{padding:0 14px 14px;border-top:1.5px solid var(--border)}
+.mem-row{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--bg3);border-radius:7px;margin-bottom:4px}
+.pbadge{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600}
+.pb-l{background:rgba(0,160,96,.12);color:#006a3a;border:1px solid rgba(0,160,96,.3)}
+.pb-r{background:rgba(0,100,220,.12);color:#004a9a;border:1px solid rgba(0,100,220,.3)}
+.pb-h{background:rgba(200,120,0,.12);color:#8a4a00;border:1px solid rgba(200,120,0,.3)}
+.tog{width:44px;height:24px;border-radius:12px;border:none;cursor:pointer;position:relative;flex-shrink:0;transition:background .2s}
+.tog.on{background:var(--accent)}.tog.off{background:#c8d8e8}
+.tog::after{content:'';position:absolute;top:2px;width:20px;height:20px;background:#fff;border-radius:50%;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.tog.on::after{left:22px}.tog.off::after{left:2px}
+.add-form{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:13px;margin-bottom:12px;box-shadow:0 1px 5px rgba(0,100,200,.05)}
+.f-row{display:flex;gap:7px;margin-bottom:7px}
+.add-btn{background:var(--accent);color:#fff;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;box-shadow:0 3px 10px rgba(192,80,10,.25)}
+.del-btn{background:transparent;border:none;color:var(--red);font-size:15px;cursor:pointer;padding:3px}
+.srch{width:100%;background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none;margin-bottom:9px}
+.sync-box{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:13px;margin-bottom:14px}
+.sync-row{display:flex;gap:7px;margin-top:10px}
+.sync-btn{flex:1;padding:9px;border-radius:8px;border:1.5px solid;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;text-align:center}
+.sb-export{background:var(--accent);color:#fff;border-color:var(--accent)}
+.sb-import{background:#fff;color:var(--accent);border-color:var(--accent)}
+
+/* ── Calendar ── */
+.cal-wrap{position:relative}
+.cal-input{cursor:pointer;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b4a28' stroke-width='2'%3E%3Crect x='3' y='4' width='18' height='18' rx='2'/%3E%3Cline x1='16' y1='2' x2='16' y2='6'/%3E%3Cline x1='8' y1='2' x2='8' y2='6'/%3E%3Cline x1='3' y1='10' x2='21' y2='10'/%3E%3C/svg%3E") no-repeat right 10px center;padding-right:36px}
+.cal-popup{position:absolute;top:calc(100% + 4px);left:0;z-index:500;background:#fff;border:1.5px solid var(--border);border-radius:12px;box-shadow:var(--sh2);padding:12px;width:280px}
+.cal-popup.hidden{display:none}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-nav-btn{background:none;border:1.5px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:14px;font-family:inherit;color:var(--text2)}
+.cal-nav-btn:hover{background:var(--bg3)}
+.cal-month-lbl{font-weight:700;font-size:14px;color:var(--text)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-dow{font-size:10px;font-weight:700;text-align:center;padding:3px 0;color:var(--text3)}
+.cal-dow.sun{color:#c02020}.cal-dow.sat{color:#0055aa}
+.cal-day{font-size:12px;text-align:center;padding:5px 2px;border-radius:6px;cursor:pointer;color:var(--text);font-weight:500;border:1.5px solid transparent}
+.cal-day:hover:not(.cal-empty){background:var(--bg3);border-color:var(--border)}
+.cal-day.cal-today{color:var(--accent);font-weight:700}
+.cal-day.cal-selected{background:var(--accent);color:#fff!important;border-color:var(--accent)!important;font-weight:700}
+.cal-day.cal-empty{color:transparent;pointer-events:none}
+.cal-day.cal-sun{color:#c02020}.cal-day.cal-sat{color:#0055aa}
+
+/* ── Time select ── */
+.time-sel{width:100%;background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b4a28' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:32px;cursor:pointer}
+.time-sel:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(192,80,10,.1)}
+.time-custom{margin-top:6px}
+
+/* ── Modal ── */
+.overlay{position:fixed;inset:0;background:rgba(0,40,100,.5);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px;backdrop-filter:blur(3px)}
+.modal{background:#fff;border:2px solid var(--accent);border-radius:16px;padding:22px;width:100%;max-width:320px;box-shadow:var(--sh2)}
+.modal-title{font-size:17px;font-weight:900;color:var(--accent);margin-bottom:14px}
+.remember-row{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--text2)}
+.remember-row input{width:16px;height:16px;accent-color:var(--accent);cursor:pointer}
+.m-btns{display:flex;gap:8px;margin-top:14px}
+.m-cancel{flex:1;background:#f0f4f8;border:1.5px solid var(--border);color:var(--text2);padding:10px;border-radius:8px;cursor:pointer;font-family:inherit;font-weight:600}
+.m-confirm{flex:1;background:var(--accent);color:#fff;border:none;padding:10px;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;z-index:300;white-space:nowrap;display:none;font-weight:600;box-shadow:var(--sh2);pointer-events:none}
+.hidden-page{display:none}
+
+/* ── Firebase setup guide ── */
+.setup-guide{background:#fff3cd;border:1.5px solid #ffc107;border-radius:10px;padding:14px;margin-bottom:14px;font-size:12px;line-height:1.8;color:#664d03}
+.setup-guide strong{color:#c0500a}
+.setup-guide code{background:#fff;border:1px solid #ffc107;border-radius:4px;padding:1px 5px;font-family:monospace;font-size:11px}
+.setup-step{display:flex;gap:8px;margin-bottom:6px}
+.step-num{background:#c0500a;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
+
+/* ── Loading ── */
+.loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:16px}
+.loading-spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:14px;font-weight:700;color:var(--text2)}
+.loading-sub{font-size:12px;color:var(--text3);margin-top:-8px}
+
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── Finance ── */
+.fin-sum{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.fin-sum-box{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;box-shadow:0 1px 5px rgba(0,100,200,.05)}
+.fin-sum-n{font-size:20px;font-weight:900}
+.fin-sum-l{font-size:10px;color:var(--text2);font-weight:600;margin-top:1px}
+.fin-sum-n.income{color:var(--green)}.fin-sum-n.expense{color:var(--red)}.fin-sum-n.balance{color:var(--accent)}.fin-sum-n.unpaid{color:var(--orange)}
+.fin-tabs{display:flex;gap:6px;margin-bottom:12px}
+.fin-tab{flex:1;padding:8px 4px;border-radius:8px;border:1.5px solid var(--border);background:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--text2);text-align:center}
+.fin-tab.active{border-color:var(--accent);color:var(--accent);background:rgba(192,80,10,.07)}
+.fee-row{display:flex;align-items:center;padding:9px 11px;background:#fff;border:1.5px solid var(--border);border-radius:9px;margin-bottom:5px;gap:8px}
+.fee-name{font-size:13px;font-weight:700;flex:1;min-width:0}
+.fee-nick{font-size:10px;color:var(--text3);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fee-badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;white-space:nowrap;flex-shrink:0}
+.fb-paid{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)}
+.fb-unpaid{background:rgba(192,80,10,.1);color:var(--accent);border:1px solid rgba(192,80,10,.3)}
+.fb-partial{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-bd)}
+.fb-trial{background:#e8eeff;color:#3355cc;border:1px solid #aabbff}
+.fee-amt{font-size:11px;color:var(--text2);white-space:nowrap;flex-shrink:0}
+.fee-last5{font-size:10px;color:var(--text3);font-family:monospace;background:var(--bg3);border-radius:4px;padding:1px 5px;flex-shrink:0}
+.txn-row{display:flex;align-items:center;padding:9px 11px;background:#fff;border:1.5px solid var(--border);border-radius:9px;margin-bottom:5px;gap:8px}
+.txn-icon{font-size:18px;flex-shrink:0}
+.txn-info{flex:1;min-width:0}
+.txn-desc{font-size:13px;font-weight:600}
+.txn-date{font-size:10px;color:var(--text3)}
+.txn-amt{font-size:14px;font-weight:900;white-space:nowrap;flex-shrink:0}
+.txn-amt.pos{color:var(--green)}.txn-amt.neg{color:var(--red)}
+.txn-del{background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:2px 4px;flex-shrink:0}
+.gear-row{display:flex;align-items:flex-start;padding:10px 12px;background:#fff;border:1.5px solid var(--border);border-radius:9px;margin-bottom:5px;gap:8px}
+.gear-info{flex:1;min-width:0}
+.gear-name{font-size:13px;font-weight:700}
+.gear-items{font-size:11px;color:var(--text2);margin-top:2px;line-height:1.6}
+.gear-total{font-size:13px;font-weight:700;color:var(--accent);white-space:nowrap;flex-shrink:0}
+.gear-status{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.price-inp-row{display:flex;align-items:center;gap:6px;margin-bottom:7px;flex-wrap:wrap}
+.price-inp-label{font-size:12px;color:var(--text2);font-weight:600;width:64px;flex-shrink:0}
+.price-inp{background:#fff;border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit;color:var(--text);width:90px;outline:none}
+.price-inp:focus{border-color:var(--accent)}
+.period-sel{background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b4a28' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:32px;cursor:pointer}
+.gear-qty{background:#fff;border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-size:12px;font-family:inherit;color:var(--text);width:50px;outline:none;text-align:center}
+.fin-report-box{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.self-fee-card{background:rgba(192,80,10,.05);border:1.5px solid rgba(192,80,10,.25);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.self-gear-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg3);border-radius:8px;margin-bottom:6px;border:1.5px solid var(--border)}
+.qty-btn{width:28px;height:28px;border-radius:6px;border:1.5px solid var(--border);background:#fff;font-size:16px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1}
+.qty-val{font-size:14px;font-weight:700;min-width:20px;text-align:center}
+</style>
+</head>
+<body>
+
+<!-- Loading screen -->
+<div class="loading-screen" id="loadingScreen">
+  <div style="font-size:48px">🐉</div>
+  <div class="loading-spinner"></div>
+  <div class="loading-text">胸腔戰士划龍舟</div>
+  <div class="loading-sub" id="loadingMsg">連線中...</div>
+</div>
+
+<div id="root" style="display:none">
+  <div class="hdr">
+    <div class="hdr-row">
+      <div class="brand">
+        <span class="brand-icon">🐉</span>
+        <div>
+          <div class="brand-name">胸腔戰士划龍舟
+            <span class="sync-dot" id="syncDot"></span>
+          </div>
+        </div>
+      </div>
+      <div class="rbtns" id="rolebtns">
+        <button class="rbtn" onclick="openPw('coach')">教練</button>
+        <button class="rbtn" onclick="openPw('admin')">管理</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" id="tab-member" onclick="go('member')">✏️ 登記</button>
+    <button class="tab" id="tab-sessions" onclick="go('sessions')">📅 場次</button>
+    <button class="tab hidden" id="tab-coach" onclick="go('coach')">🚣 排槳位</button>
+    <button class="tab hidden" id="tab-admin" onclick="go('admin')">⚙️ 管理</button>
+    <button class="tab hidden" id="tab-finance" onclick="go('finance')">💰 財務</button>
+  </div>
+
+  <div class="content">
+
+    <!-- REGISTER -->
+    <div id="page-member">
+      <div class="pg-title">出席登記</div>
+      <div class="pg-sub" id="member-sub">輸入名字查詢，可新增或取消出席</div>
+      <div class="ig">
+        <label class="lbl">你的名字</label>
+        <div style="display:flex;gap:8px">
+          <input class="inp" id="regName" placeholder="輸入名字" style="flex:1" onkeydown="if(event.key==='Enter')lookup()">
+          <button onclick="lookup()" style="background:var(--accent);color:#fff;border:none;padding:0 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">查詢</button>
+        </div>
+      </div>
+      <div id="member-hint" style="font-size:13px;color:var(--text2);text-align:center;padding:30px 0">輸入名字後按查詢</div>
+      <div id="att-editor" style="display:none">
+        <div style="font-size:14px;font-weight:700;color:var(--accent);margin-bottom:10px" id="att-title"></div>
+        <div id="att-items"></div>
+        <button class="sub-btn" onclick="saveAtt()">✅ 儲存出席</button>
+        <div id="self-gear-section" style="margin-top:14px;display:none">
+          <div style="font-size:14px;font-weight:700;color:var(--green);margin-bottom:8px">🛒 裝備訂購</div>
+          <div id="self-gear-items"></div>
+          <button class="sub-btn" style="margin-top:8px;background:linear-gradient(135deg,#005a28,#00a050);box-shadow:0 4px 12px rgba(0,160,80,.3)" onclick="saveSelfGear()">📦 送出裝備訂單</button>
+        </div>
+        <div id="self-fee-section" style="margin-top:14px;display:none">
+          <div style="font-size:14px;font-weight:700;color:var(--accent);margin-bottom:8px">💰 我的繳費狀態</div>
+          <div id="self-fee-info"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FINANCE -->
+    <div id="page-finance" class="hidden-page">
+      <div class="pg-title">💰 財務管理</div>
+      <div class="pg-sub">隊費收支、裝備訂單、總務對帳</div>
+
+      <!-- 摘要 -->
+      <div class="fin-sum" id="fin-summary"></div>
+
+      <!-- 子分頁 -->
+      <div class="fin-tabs">
+        <button class="fin-tab active" id="ftab-fee" onclick="setFinTab('fee')">💳 隊費</button>
+        <button class="fin-tab" id="ftab-gear" onclick="setFinTab('gear')">🛒 裝備</button>
+        <button class="fin-tab" id="ftab-txn" onclick="setFinTab('txn')">📊 收支</button>
+        <button class="fin-tab" id="ftab-report" onclick="setFinTab('report')">📋 報表</button>
+      </div>
+
+      <!-- 隊費 tab -->
+      <div id="fin-fee-tab">
+        <div style="margin-bottom:10px;display:flex;gap:6px;align-items:center">
+          <select class="period-sel" id="feePeriodFilter" onchange="renderFinance()" style="flex:1">
+          </select>
+          <select class="period-sel" id="feeStatusFilter" onchange="renderFinance()" style="width:90px">
+            <option value="all">全部</option>
+            <option value="unpaid">未繳</option>
+            <option value="paid">已繳</option>
+          </select>
+        </div>
+        <div id="fin-fee-list"></div>
+      </div>
+
+      <!-- 裝備 tab -->
+      <div id="fin-gear-tab" style="display:none">
+        <div style="margin-bottom:10px;display:flex;gap:6px;align-items:center">
+          <select class="period-sel" id="gearStatusFilter" onchange="renderFinance()" style="flex:1">
+            <option value="all">全部訂單</option>
+            <option value="pending">待繳費</option>
+            <option value="paid">已付款</option>
+            <option value="delivered">已交貨</option>
+          </select>
+        </div>
+        <!-- 裝備價格設定 -->
+        <div class="fin-report-box" style="margin-bottom:10px">
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px">⚙️ 裝備價格（可調整）</div>
+          <div class="price-inp-row">
+            <span class="price-inp-label">隊服</span>
+            <input class="price-inp" type="number" id="priceUniform" min="0" value="380" oninput="saveGearPrices()">
+            <span style="font-size:11px;color:var(--text3)">元/件</span>
+          </div>
+          <div class="price-inp-row">
+            <span class="price-inp-label">救生衣</span>
+            <input class="price-inp" type="number" id="priceLife" min="0" value="950" oninput="saveGearPrices()">
+            <span style="font-size:11px;color:var(--text3)">元/件</span>
+          </div>
+          <div class="price-inp-row">
+            <span class="price-inp-label">屁墊</span>
+            <input class="price-inp" type="number" id="pricePad" min="0" value="180" oninput="saveGearPrices()">
+            <span style="font-size:11px;color:var(--text3)">元/個</span>
+          </div>
+          <div class="price-inp-row">
+            <span class="price-inp-label">自訂項目</span>
+            <input class="price-inp" type="text" id="priceCustomName" placeholder="名稱" style="width:80px">
+            <input class="price-inp" type="number" id="priceCustomAmt" min="0" placeholder="金額" style="width:70px">
+            <span style="font-size:11px;color:var(--text3)">元</span>
+          </div>
+        </div>
+        <div id="fin-gear-list"></div>
+      </div>
+
+      <!-- 收支 tab -->
+      <div id="fin-txn-tab" style="display:none">
+        <!-- 新增收支 -->
+        <div class="add-form" style="margin-bottom:12px">
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px">新增收支紀錄</div>
+          <div class="f-row">
+            <select class="time-sel" id="txnType" style="width:90px;flex-shrink:0" onchange="txnTypeChange()">
+              <option value="income">收入</option>
+              <option value="expense">支出</option>
+            </select>
+            <input class="inp" id="txnAmt" type="number" placeholder="金額" min="0" style="width:90px;flex-shrink:0">
+          </div>
+          <div class="ig" style="margin-bottom:8px">
+            <select class="time-sel" id="txnCat">
+              <option value="隊費">隊費收入</option>
+              <option value="裝備款">裝備款</option>
+              <option value="比賽補助">比賽補助</option>
+              <option value="獎金">比賽獎金</option>
+              <option value="捐贈">捐贈/贊助</option>
+              <option value="其他收入">其他收入</option>
+              <option value="報名費">比賽報名費</option>
+              <option value="場地費">場地費</option>
+              <option value="教練費">教練費</option>
+              <option value="餐費">餐費/聚餐</option>
+              <option value="其他支出">其他支出</option>
+            </select>
+          </div>
+          <div class="ig" style="margin-bottom:8px">
+            <input class="inp" id="txnDesc" placeholder="說明（如：王大明 上半年隊費）">
+          </div>
+          <div class="ig" style="margin-bottom:8px">
+            <div class="cal-wrap">
+              <input class="inp cal-input" id="txnDateDisplay" placeholder="點擊選擇日期" readonly onclick="toggleTxnCal()">
+              <input type="hidden" id="txnDateVal">
+              <div class="cal-popup hidden" id="txnCalPopup">
+                <div class="cal-nav">
+                  <button class="cal-nav-btn" onclick="txnCalNav(-1)">‹</button>
+                  <span class="cal-month-lbl" id="txnCalMonthLbl"></span>
+                  <button class="cal-nav-btn" onclick="txnCalNav(1)">›</button>
+                </div>
+                <div class="cal-grid" id="txnCalDows"></div>
+                <div class="cal-grid" id="txnCalDays"></div>
+              </div>
+            </div>
+          </div>
+          <button class="add-btn" onclick="addTxn()">➕ 新增</button>
+        </div>
+        <div id="fin-txn-list"></div>
+      </div>
+
+      <!-- 報表 tab -->
+      <div id="fin-report-tab" style="display:none">
+        <div class="fin-report-box">
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px">選擇期間</div>
+          <select class="period-sel" id="reportPeriod" onchange="renderReport()">
+          </select>
+        </div>
+        <div id="fin-report-content"></div>
+        <button class="copy-all-btn" style="margin-top:8px" onclick="copyReport()">📋 複製財報到 LINE</button>
+      </div>
+    </div>
+
+
+    <!-- SESSIONS -->
+    <div id="page-sessions" class="hidden-page">
+      <div id="sess-month-nav"></div>
+      <div class="stat-row">
+        <div class="stat-box"><div class="sn" id="stat-s">0</div><div class="sl">場次</div></div>
+        <div class="stat-box"><div class="sn" id="stat-m">0</div><div class="sl">本月隊員</div></div>
+        <div class="stat-box"><div class="sn" id="stat-a">0</div><div class="sl">平均出席</div></div>
+      </div>
+      <div id="sess-cards"></div>
+    </div>
+
+    <!-- COACH -->
+    <div id="page-coach" class="hidden-page">
+      <div class="pg-title">排槳位</div>
+      <div class="pg-sub">選場次 → 分配隊員 → 點船位圖格子互換 → 公布</div>
+      <div id="coach-month-nav"></div>
+      <div id="coach-list"></div>
+    </div>
+
+    <!-- ADMIN -->
+    <div id="page-admin" class="hidden-page">
+
+      <!-- Firebase Status -->
+      <div class="sync-box">
+        <div class="sec-ttl">☁️ 雲端狀態</div>
+        <div id="fb-status" style="font-size:12px;color:var(--text2);line-height:1.8;padding:8px;background:var(--bg3);border-radius:8px">連線中...</div>
+        <button onclick="diagData()" style="width:100%;margin-top:8px;padding:8px;border-radius:7px;border:1.5px solid var(--border);background:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--text2)">🔍 診斷資料狀態</button>
+        <pre id="diag-out" style="display:none;margin-top:8px;background:#f0f4f8;border:1px solid #c0d0e0;border-radius:7px;padding:10px;font-size:11px;line-height:1.7;white-space:pre-wrap;color:#2a3a50;max-height:300px;overflow-y:auto"></pre>
+        <button onclick="diagData()" style="margin-top:8px;width:100%;padding:7px;border-radius:7px;border:1.5px solid var(--border);background:#fff;font-size:11px;font-weight:700;cursor:pointer;color:var(--text2)">🔍 診斷資料（Debug）</button>
+        <div id="diag-out" style="margin-top:6px;font-size:10px;font-family:monospace;background:#f0f4f8;border-radius:6px;padding:6px;display:none;word-break:break-all;max-height:120px;overflow-y:auto"></div>
+        <div class="sync-row">
+          <button class="sync-btn sb-export" onclick="exportData()">📤 匯出備份</button>
+          <button class="sync-btn sb-import" onclick="showImport()">📥 匯入資料</button>
+        </div>
+      </div>
+
+      <!-- BATCH GENERATOR -->
+      <div class="sec-ttl">📅 批次產生月份場次</div>
+      <div class="add-form">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:10px;line-height:1.6">
+          自動產生每週二、六場次，可個別勾選、修改時間或備注後一鍵新增。
+        </div>
+        <div class="f-row" style="align-items:center;gap:8px">
+          <label class="lbl" style="margin:0;white-space:nowrap">選月份</label>
+          <select class="time-sel" id="batchMonthSel" style="flex:1" onchange="renderBatchPreview()"></select>
+        </div>
+        <div id="batch-preview" style="margin-top:10px"></div>
+        <button class="add-btn" id="batchAddBtn" style="display:none;margin-top:8px" onclick="batchAdd()">➕ 新增勾選的場次</button>
+      </div>
+
+      <!-- SINGLE ADD -->
+      <div class="sec-ttl">✏️ 單獨新增場次</div>
+      <div class="add-form">
+        <div class="ig" style="margin-bottom:10px">
+          <label class="lbl">日期</label>
+          <div class="cal-wrap">
+            <input class="inp cal-input" id="newDateDisplay" placeholder="點擊選擇日期" readonly onclick="toggleCal()">
+            <input type="hidden" id="newDateVal">
+            <div class="cal-popup hidden" id="calPopup">
+              <div class="cal-nav">
+                <button class="cal-nav-btn" onclick="calNav(-1)">‹</button>
+                <span class="cal-month-lbl" id="calMonthLbl"></span>
+                <button class="cal-nav-btn" onclick="calNav(1)">›</button>
+              </div>
+              <div class="cal-grid" id="calDows"></div>
+              <div class="cal-grid" id="calDays"></div>
+            </div>
+          </div>
+        </div>
+        <div class="ig" style="margin-bottom:10px">
+          <label class="lbl">時間</label>
+          <select class="time-sel" id="newTimeSel" onchange="handleTimeSel()">
+            <option value="06:00-08:00">06:00-08:00</option>
+            <option value="06:00-07:00">06:00-07:00</option>
+            <option value="07:00-08:00">07:00-08:00</option>
+            <option value="other">其他（自填）</option>
+          </select>
+          <div class="time-custom hidden" id="timeCustom">
+            <input class="inp" id="newTimeCustom" placeholder="自填時間，如 08:00-09:00" style="margin-top:6px">
+          </div>
+        </div>
+        <div class="ig" style="margin-bottom:10px">
+          <label class="lbl">備注（選填）</label>
+          <input class="inp" id="newNote" placeholder="如：三腳渡、友誼賽">
+        </div>
+        <button class="add-btn" onclick="addSession()">新增場次</button>
+      </div>
+
+      <!-- MEMBER MANAGEMENT -->
+      <div class="sec-ttl">👥 隊員名單管理</div>
+      <div class="add-form" id="member-mgmt">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:8px">可刪除重複或錯誤的隊員名稱</div>
+        <div id="member-list-admin"></div>
+      </div>
+
+      <!-- EXISTING SESSIONS -->
+      <div class="sec-ttl">🗂 已建立場次管理</div>
+      <div id="adm-month-nav" style="margin-bottom:8px"></div>
+      <input class="srch" id="adminSrch" placeholder="搜尋隊員..." oninput="renderAdmin()">
+      <div id="admin-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PW Modal -->
+<div class="overlay" id="pwModal" style="display:none">
+  <div class="modal">
+    <div class="modal-title" id="pwTitle">登入</div>
+    <input class="inp" type="password" id="pwInput" placeholder="請輸入密碼" onkeydown="if(event.key==='Enter')doPw()">
+    <div id="rememberRow" class="remember-row" style="display:none">
+      <input type="checkbox" id="rememberMe">
+      <label for="rememberMe" style="cursor:pointer">記住我，下次自動登入</label>
+    </div>
+    <div class="m-btns">
+      <button class="m-cancel" onclick="closePw()">取消</button>
+      <button class="m-confirm" onclick="doPw()">確認</button>
+    </div>
+  </div>
+</div>
+
+<!-- Import Modal -->
+<div class="overlay" id="importModal" style="display:none">
+  <div class="modal">
+    <div class="modal-title">📥 匯入資料</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:10px">貼上之前匯出的備份文字</div>
+    <textarea class="inp" id="importTxt" placeholder="貼上備份..." style="height:110px;resize:none;font-size:11px;font-family:monospace"></textarea>
+    <div class="m-btns">
+      <button class="m-cancel" onclick="document.getElementById('importModal').style.display='none'">取消</button>
+      <button class="m-confirm" onclick="doImport()">匯入</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Session Modal -->
+<div class="overlay" id="editSessModal" style="display:none">
+  <div class="modal">
+    <div class="modal-title">✏️ 修改場次</div>
+    <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px" id="editSessDate"></div>
+    <div class="edit-row">
+      <label class="lbl">時間</label>
+      <select class="time-sel" id="editSessTime" onchange="handleEditTimeSel()">
+        <option value="06:00-08:00">06:00-08:00</option>
+        <option value="06:00-07:00">06:00-07:00</option>
+        <option value="07:00-08:00">07:00-08:00</option>
+        <option value="other">其他（自填）</option>
+      </select>
+      <div id="editSessCustomRow" style="display:none;margin-top:6px">
+        <input class="inp" id="editSessTimeCustom" placeholder="自填時間">
+      </div>
+    </div>
+    <div class="edit-row">
+      <label class="lbl">備注</label>
+      <input class="inp" id="editSessNote" placeholder="如：三腳渡、友誼賽" maxlength="20">
+    </div>
+    <div class="m-btns">
+      <button class="m-cancel" onclick="document.getElementById('editSessModal').style.display='none'">取消</button>
+      <button class="m-confirm" onclick="saveEditSess()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase REST API -->
+<script>
+const FB_URL = 'https://chestman-dragonboat-default-rtdb.asia-southeast1.firebasedatabase.app/dragonboat/v1.json';
+function fetchT(url, opts, ms) {
+  return new Promise((res, rej) => {
+    const t = setTimeout(() => rej(new Error('timeout')), ms);
+    fetch(url, opts).then(r=>{clearTimeout(t);res(r);}).catch(e=>{clearTimeout(t);rej(e);});
+  });
+}
+window._fbReady = true;
+window._fbLoad = async function() {
+  try { const r=await fetchT(FB_URL,{},6000); if(!r.ok)return null; const d=await r.json(); return(d&&typeof d==='object')?d:null; }
+  catch(e){return null;}
+};
+window._fbSave = async function(data) {
+  try {
+    window._setSyncStatus('syncing');
+    const r=await fetchT(FB_URL,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)},8000);
+    if(r.ok){window._setSyncStatus('ok');return true;}
+    window._setSyncStatus('offline');return false;
+  } catch(e){window._setSyncStatus('offline');return false;}
+};
+let _lt=null;
+window._fbListen = function(cb) {
+  if(_lt)clearInterval(_lt);
+  _lt=setInterval(async()=>{if(document.hidden)return;const d=await window._fbLoad();if(d)cb(d);},12000);
+};
+</script>
+
+<script>
+// ─── Config ──────────────────────────────────────────────────────
+const ADMIN_PW = 'chestman', COACH_PW = 'paddle', ROWS = 10;
+const BNAMES = ['第一船', '第二船', '第三船'];
+const BTXT = ['#0055aa', '#007a4a', '#9a5800'];
+const BBG = ['rgba(0,85,170,.08)', 'rgba(0,122,74,.08)', 'rgba(154,88,0,.08)'];
+const BBDR = ['rgba(0,85,170,.2)', 'rgba(0,122,74,.2)', 'rgba(154,88,0,.2)'];
+const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
+
+const SSEED = [
+  {id:'s1',date:'2026/5/12（二）',time:'06:00-07:00',note:''},
+  {id:'s2',date:'2026/5/14（四）',time:'06:00-07:00',note:''},
+  {id:'s3',date:'2026/5/16（六）',time:'06:00-08:00',note:'三腳渡'},
+  {id:'s4',date:'2026/5/17（日）',time:'06:00-08:00',note:'三腳渡'},
+  {id:'s5',date:'2026/5/19（二）',time:'06:00-07:00',note:''},
+  {id:'s6',date:'2026/5/21（四）',time:'06:00-07:00',note:'教練不在'},
+  {id:'s7',date:'2026/5/23（六）',time:'06:00-07:00',note:'教練不在'},
+  {id:'s8',date:'2026/5/24（日）',time:'06:00-07:00',note:'教練不在'},
+  {id:'s9',date:'2026/5/26（二）',time:'06:00-07:00',note:''},
+  {id:'s10',date:'2026/5/28（四）',time:'06:00-07:00',note:''},
+  {id:'s11',date:'2026/5/28（四）',time:'18:00-21:00',note:'慶功宴'},
+  {id:'s12',date:'2026/5/30（六）',time:'06:00-07:00',note:''},
+  {id:'s13',date:'2026/5/31（日）',time:'07:00-08:00',note:'友誼賽'},
+  {id:'s14',date:'2026/6/2（二）',time:'06:00-07:00',note:''},
+  {id:'s15',date:'2026/6/3（三）',time:'19:00-21:00',note:'盪槳池'},
+  {id:'s16',date:'2026/6/4（四）',time:'06:00-07:00',note:''},
+  {id:'s17',date:'2026/6/6（六）',time:'06:00-08:00',note:'三腳渡・祭江'},
+  {id:'s18',date:'2026/6/7（日）',time:'06:00-07:00',note:''},
+  {id:'s19',date:'2026/6/7（日）',time:'13:30-14:30',note:''},
+  {id:'s20',date:'2026/6/9（二）',time:'06:00-07:00',note:''},
+  {id:'s21',date:'2026/6/10（三）',time:'19:00-21:00',note:'盪槳池'},
+  {id:'s22',date:'2026/6/11（四）',time:'06:00-07:00',note:''},
+  {id:'s23',date:'2026/6/13（六）',time:'06:00-07:00',note:''},
+  {id:'s24',date:'2026/6/13（六）',time:'13:30-14:30',note:''},
+  {id:'s25',date:'2026/6/14（日）',time:'06:00-07:00',note:''},
+  {id:'s26',date:'2026/6/14（日）',time:'13:30-14:30',note:''},
+];
+
+// ─── State ───────────────────────────────────────────────────────
+let role = 'guest', curPage = 'member', pwTarget = 'coach';
+let sessions = [], members = [], att = {}, boatAsgn = {}, published = {};
+let lookupName = '', myEdits = {};
+let expandSid = null, coachSid = null, cBc = 1, cBi = 0;
+let selName = null, showDiag = false, showLine = false, adminExpSid = null;
+let swapSrc = null;
+let calYear = new Date().getFullYear(), calMonth = new Date().getMonth(), calSelDate = null;
+let curMonthKey = `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`;
+let editSid = null;
+let _ignoreFbUpdate = false;
+
+// ─── Sync status ──────────────────────────────────────────────────
+window._setSyncStatus = function(st) {
+  const dot = document.getElementById('syncDot');
+  if (!dot) return;
+  dot.className = 'sync-dot' + (st==='ok' ? '' : st==='syncing' ? ' syncing' : ' offline');
+  dot.title = st==='ok' ? '☁️ 已同步' : st==='syncing' ? '⏳ 同步中...' : '⚠️ 離線';
+  const fb = document.getElementById('fb-status');
+  if (fb) {
+    if (st==='ok') fb.innerHTML = '✅ <strong>雲端連線正常</strong>　所有裝置即時同步，隊員填寫後你立刻看到';
+    else if (st==='syncing') fb.textContent = '⏳ 同步中...';
+    else fb.textContent = '⚠️ 離線 — 請檢查 Firebase 設定';
+  }
+};
+
+// ─── Date helpers ─────────────────────────────────────────────────
+function parseDate(ds) {
+  const m4 = ds.match(/(\d{4})\/(\d+)\/(\d+)/);
+  if (m4) return {y:+m4[1], m:+m4[2], d:+m4[3]};
+  const m2 = ds.match(/(\d+)\/(\d+)/);
+  if (m2) return {y:new Date().getFullYear(), m:+m2[1], d:+m2[2]};
+  return null;
+}
+function parseDateNum(ds) { const p=parseDate(ds); return p?p.y*10000+p.m*100+p.d:0; }
+function migrateLegacyDate(s) {
+  if (/^\d+\/\d+/.test(s.date)) {
+    const p = parseDate(s.date);
+    if (p) { const dow=new Date(p.y,p.m-1,p.d).getDay(); s.date=`${p.y}/${p.m}/${p.d}（${WEEKDAYS[dow]}）`; }
+  }
+}
+function sessMK(s) { const p=parseDate(s.date); if(!p)return curMonthKey; return`${p.y}-${String(p.m).padStart(2,'0')}`; }
+function allMonthKeys() { const ks=new Set(sessions.map(s=>sessMK(s))); return[...ks].sort(); }
+function mkLabel(mk) { const[y,m]=mk.split('-'); const ny=new Date().getFullYear(); return+y!==ny?`${y} 年 ${+m} 月`:`${+m} 月`; }
+function filteredSessions() { return sessions.filter(s=>sessMK(s)===curMonthKey); }
+function monthNavHTML() {
+  const mks=allMonthKeys(); if(!mks.length)return'';
+  // 確保 curMonthKey 在有效範圍內，但不修改全域變數
+  let si=mks.indexOf(curMonthKey);
+  if(si===-1){ si=mks.length-1; }
+  const prev=si>0?mks[si-1]:null, next=si<mks.length-1?mks[si+1]:null;
+  const cnt=filteredSessions().length;
+  return`<div class="month-nav">
+    <button class="month-nav-btn" ${prev?`onclick="setMonth('${prev}')"`:'disabled style="opacity:.3;cursor:default"'}>‹</button>
+    <div style="text-align:center">
+      <div class="month-nav-lbl">${mkLabel(curMonthKey)}</div>
+      <div class="month-nav-count">${cnt} 個場次</div>
+    </div>
+    <button class="month-nav-btn" ${next?`onclick="setMonth('${next}')"`:'disabled style="opacity:.3;cursor:default"'}>›</button>
+  </div>`;
+}
+function setMonth(mk) { curMonthKey=mk; expandSid=null; coachSid=null; if(lookupName){myEdits={};filteredSessions().forEach(s=>{myEdits[s.id]=isAtt(s.id,lookupName);});} renderCur(); }
+
+function deadline(ds) { const p=parseDate(ds); if(!p)return null; return new Date(p.y,p.m-1,p.d-1,20,0,0); }
+function locked(s) { const d=deadline(s.date); return d?new Date()>d:false; }
+function timeLeft(s) {
+  const d=deadline(s.date); if(!d)return null;
+  const diff=d-new Date(); if(diff<=0)return null;
+  const h=Math.floor(diff/3600000), mn=Math.floor((diff%3600000)/60000);
+  if(h>24)return`還有${Math.floor(h/24)}天`;
+  if(h>0)return`還有${h}小時${mn}分`;
+  return`還有${mn}分鐘`;
+}
+function dlStr(s) { const d=deadline(s.date); if(!d)return''; return`${d.getMonth()+1}/${d.getDate()} 晚上8點截止`; }
+
+// ─── Data helpers ─────────────────────────────────────────────────
+function isAtt(sid,n) { const v=att[`${sid}__${n}`]; if(!v)return false; if(typeof v==='boolean')return v; return v.on||false; }
+function attData(sid,n) {
+  const v=att[`${sid}__${n}`];
+  if(!v) return{on:false,position:'右槳',gender:'',weight:0};
+  if(typeof v==='boolean'){const m=members.find(x=>x.name===n); return{on:v,position:m?.position||'右槳',gender:m?.gender||'',weight:m?.weight||0};}
+  return{on:v.on||false,position:v.position||'右槳',gender:v.gender||'',weight:v.weight||0};
+}
+function getAtt(sid) {
+  const names=new Set();
+  Object.keys(att).forEach(k=>{if(k.startsWith(sid+'__')&&isAtt(sid,k.slice(sid.length+2)))names.add(k.slice(sid.length+2));});
+  return[...names].map(name=>{const d=attData(sid,name); return{name,position:d.position,gender:d.gender,weight:d.weight||0};});
+}
+function seat(sid,bi,pos) { return boatAsgn[`${sid}__${bi}__${pos}`]||null; }
+function memberBoat(sid,name,bc) { for(let b=0;b<(bc||3);b++)if(boatAsgn[`${sid}__${b}__${name}`])return{bi:b}; return null; }
+function unassigned(sid,bc) { return getAtt(sid).filter(m=>!memberBoat(sid,m.name,bc)); }
+
+// ─── Toast ────────────────────────────────────────────────────────
+let _tt;
+function toast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.style.display='block'; clearTimeout(_tt); _tt=setTimeout(()=>t.style.display='none',2800); }
+
+// ─── Cloud save/load ──────────────────────────────────────────────
+function toCloudData() {
+  // Firebase doesn't support keys with dots or special chars, encode att/boatAsgn keys
+  const encAtt={}, encBoat={};
+  Object.entries(att).forEach(([k,v])=>{ encAtt[k.replace(/__/g,'||')]=v; });
+  Object.entries(boatAsgn).forEach(([k,v])=>{ encBoat[k.replace(/__/g,'||')]=v; });
+  return {s:sessions, m:members, a:encAtt, b:encBoat, p:published, f:fees, g:gearOrders, t:transactions, gp:gearPrices, ts:Date.now()};
+}
+function fromCloudData(d) {
+  sessions = d.s || SSEED;
+  members = d.m || [];
+  // 從 att 補齊所有出現過但不在 members 的人（相容舊資料）
+  if(d.a) {
+    const nameMap = {};
+    // att key 格式可能是 || 或 __ 編碼，統一解成名字
+    Object.keys(d.a).forEach(k => {
+      const decoded = k.replace(/\|\|/g,'__');
+      const parts = decoded.split('__');
+      if(parts.length < 2) return;
+      const name = parts.slice(1).join('__');
+      const v = d.a[k];
+      if(!nameMap[name]) nameMap[name] = {name, position:(v&&v.position)||'右槳', gender:(v&&v.gender)||'', weight:(v&&v.weight)||0};
+    });
+    // 把 att 裡有但 members 沒有的人補進去
+    Object.values(nameMap).forEach(nm => {
+      if(!members.find(m => m.name === nm.name)) members.push(nm);
+    });
+  }
+  const decAtt={}, decBoat={};
+  // 支援兩種格式：|| 編碼版本 和 舊版直接 __ 版本
+  Object.entries(d.a||{}).forEach(([k,v])=>{ decAtt[k.replace(/\|\|/g,'__')]=v; });
+  Object.entries(d.b||{}).forEach(([k,v])=>{ decBoat[k.replace(/\|\|/g,'__')]=v; });
+  // 如果解碼後 att 還是空的，嘗試直接用原始 key（舊格式相容）
+  if(!Object.keys(decAtt).length && Object.keys(d.a||{}).length) {
+    Object.entries(d.a).forEach(([k,v])=>{ decAtt[k]=v; });
+  }
+  att = decAtt; boatAsgn = decBoat; published = d.p || {};
+  fees = d.f || {};
+  gearOrders = d.g || {};
+  transactions = d.t || [];
+  if(d.gp) gearPrices = {...gearPrices, ...d.gp};
+  sessions.forEach(s=>migrateLegacyDate(s));
+  sessions.sort((a,b)=>parseDateNum(a.date)-parseDateNum(b.date));
+}
+
+let saveTimer = null;
+async function save() {
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    _ignoreFbUpdate = true;
+    await window._fbSave(toCloudData());
+    setTimeout(()=>{ _ignoreFbUpdate=false; }, 2000);
+  }, 300);
+}
+
+// ─── Navigation ───────────────────────────────────────────────────
+function go(p) {
+  curPage=p;
+  ['member','sessions','coach','admin','finance'].forEach(n=>{
+    document.getElementById('page-'+n).className = n===p ? '' : 'hidden-page';
+    const tb=document.getElementById('tab-'+n);
+    if(!tb)return;
+    const wasH=tb.classList.contains('hidden');
+    tb.className='tab'+(n===p?' active':'')+(wasH?' hidden':'');
+  });
+  renderCur();
+}
+function renderCur() {
+  if(curPage==='member') renderMember();
+  if(curPage==='sessions') renderSessions();
+  if(curPage==='coach') renderCoach();
+  if(curPage==='admin') { const _mk=curMonthKey; renderAdmin(); initBatchSel(); curMonthKey=_mk; }
+  if(curPage==='finance') renderFinance();
+}
+
+// ─── Auth ─────────────────────────────────────────────────────────
+function openPw(t) {
+  pwTarget=t;
+  document.getElementById('pwTitle').textContent=t==='coach'?'🚣 教練登入':'🔐 管理者登入';
+  document.getElementById('pwInput').value='';
+  const remRow=document.getElementById('rememberRow');
+  if(t==='admin'){remRow.style.display='flex'; document.getElementById('rememberMe').checked=false;}
+  else remRow.style.display='none';
+  document.getElementById('pwModal').style.display='flex';
+  setTimeout(()=>document.getElementById('pwInput').focus(),150);
+}
+function closePw() { document.getElementById('pwModal').style.display='none'; }
+function doPw() {
+  const v=document.getElementById('pwInput').value;
+  const ok=(pwTarget==='coach'&&v===COACH_PW)||(pwTarget==='admin'&&v===ADMIN_PW);
+  if(!ok){toast('密碼錯誤');return;}
+  if(pwTarget==='admin'&&document.getElementById('rememberMe').checked) localStorage.setItem('v7:ra',v);
+  else if(pwTarget==='admin') localStorage.removeItem('v7:ra');
+  closePw(); applyRole(pwTarget);
+}
+function applyRole(r) {
+  role=r;
+  document.getElementById('tab-coach').classList.remove('hidden');
+  if(r==='admin'){document.getElementById('tab-admin').classList.remove('hidden');document.getElementById('tab-finance').classList.remove('hidden');}
+  else{document.getElementById('tab-admin').classList.add('hidden');document.getElementById('tab-finance').classList.remove('hidden');}
+  if(r==='coach') document.getElementById('tab-member').classList.add('hidden');
+  else document.getElementById('tab-member').classList.remove('hidden');
+  document.getElementById('rolebtns').innerHTML=
+    `<button class="rbtn ${r==='coach'?'coach-on':'admin-on'}" onclick="logout()">${r==='coach'?'🚣 教練':'⚙️ 管理'} ✕</button>`;
+  go(r==='coach'?'coach':'admin');
+}
+function logout() {
+  role='guest'; localStorage.removeItem('v7:ra');
+  ['coach','admin','finance'].forEach(n=>document.getElementById('tab-'+n).classList.add('hidden'));
+  document.getElementById('tab-member').classList.remove('hidden');
+  document.getElementById('rolebtns').innerHTML=
+    `<button class="rbtn" onclick="openPw('coach')">教練</button><button class="rbtn" onclick="openPw('admin')">管理</button>`;
+  go('member');
+}
+
+// ─── Register ─────────────────────────────────────────────────────
+function visibleSessions() {
+  const now=new Date();
+  const nowMK=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const[y,m]=nowMK.split('-').map(Number);
+  const nm=m===12?1:m+1, ny=m===12?y+1:y;
+  const nextMK=`${ny}-${String(nm).padStart(2,'0')}`;
+  const showNext=now.getDate()>=20;
+  return sessions.filter(s=>{
+    const mk=sessMK(s);
+    if(mk===nowMK)return true;
+    if(showNext&&mk===nextMK)return true;
+    return false;
+  });
+}
+function renderMember() { if(lookupName) renderAttEditor(); }
+function lookup() {
+  const n=document.getElementById('regName').value.trim();
+  if(!n){toast('請輸入名字');return;}
+  lookupName=n;
+  document.getElementById('member-hint').style.display='none';
+  myEdits={};
+  visibleSessions().forEach(s=>{
+    const saved=att[`${s.id}__${n}`];
+    if(saved&&typeof saved==='object') myEdits[s.id]={on:saved.on||false,position:saved.position||'右槳',gender:saved.gender||''};
+    else myEdits[s.id]={on:false,position:'右槳',gender:''};
+  });
+  renderAttEditor();
+}
+function renderAttEditor() {
+  const el=document.getElementById('att-editor'); el.style.display='block';
+  const isNew=!members.find(m=>m.name===lookupName);
+  document.getElementById('att-title').textContent=(isNew?'🆕 ':'')+lookupName+' 的出席登記';
+  const anyEdit=Object.values(myEdits)[0]||{position:'右槳',gender:'',weight:0};
+  const posV=anyEdit.position||'右槳', genV=anyEdit.gender||'', wtV=anyEdit.weight||0;
+  const profileHTML=`<div style="background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px">
+    <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:10px">👤 個人資料（每次登記時確認）</div>
+    <div style="margin-bottom:8px"><div class="lbl">性別</div>
+      <div class="rbg">
+        <button class="rb ${genV==='男'?'sel':''}" onclick="setProfile('gender','男')">男</button>
+        <button class="rb ${genV==='女'?'sel':''}" onclick="setProfile('gender','女')">女</button>
+      </div>
+    </div>
+    <div style="margin-bottom:8px"><div class="lbl">槳位</div>
+      <div class="rbg">
+        <button class="rb ${posV==='左槳'?'sel':''}" onclick="setProfile('position','左槳')">⬅️ 左槳</button>
+        <button class="rb ${posV==='右槳'?'sel':''}" onclick="setProfile('position','右槳')">➡️ 右槳</button>
+        <button class="rb ${posV==='舵手'?'sel':''}" onclick="setProfile('position','舵手')">🚤 舵手</button>
+      </div>
+    </div>
+    <div><div class="lbl">體重（公斤）</div>
+      <input class="inp" type="number" id="weightInp" placeholder="例如：65" min="30" max="150" value="${wtV||''}" oninput="setProfileWeight(this.value)" style="width:120px">
+    </div>
+  </div>`;
+  const vs=visibleSessions();
+  if(!vs.length){document.getElementById('att-items').innerHTML=profileHTML+`<div style="text-align:center;color:var(--text3);padding:20px 0;font-size:13px">目前尚無開放填寫的場次</div>`;return;}
+  const groups={};
+  vs.forEach(s=>{const mk=sessMK(s);if(!groups[mk])groups[mk]=[];groups[mk].push(s);});
+  const mks=Object.keys(groups).sort();
+  const sessHTML=mks.map(mk=>{
+    const now=new Date(); const nowMK=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    const isNext=mk>nowMK;
+    const label=mkLabel(mk)+(isNext?' 🆕 （下個月，開放預填）':'');
+    const rows=groups[mk].map(s=>{
+      const lk=locked(s), ed=myEdits[s.id]||{on:false}, on=ed.on;
+      const tl=timeLeft(s), dl=dlStr(s);
+      const bc=lk?'dl-locked':tl&&tl.includes('小時')?'dl-soon':'dl-open';
+      const bt=lk?'🔒 已截止':tl?`⏰ ${tl}`:`⏰ ${dl}`;
+      return`<div class="att-item ${lk?'att-locked':on?'att-on':'att-off'}">
+        <div class="att-info">
+          <div class="att-date">${s.date}${s.note?` <span class="ntag">${s.note}</span>`:''}</div>
+          <div class="att-time">${s.time}</div>
+          <div class="dlbadge ${bc}">${bt}</div>
+        </div>
+        ${lk?'<span style="font-size:18px">🔒</span>':`<button class="atog ${on?'on':'off'}" onclick="togMyAtt('${s.id}')"></button>`}
+      </div>`;
+    }).join('');
+    return`<div style="margin-bottom:4px">
+      <div style="font-size:12px;font-weight:700;color:${isNext?'var(--green)':'var(--accent)'};padding:6px 10px;background:${isNext?'rgba(42,128,64,.08)':'rgba(192,80,10,.06)'};border-radius:8px;margin-bottom:6px;border-left:3px solid ${isNext?'var(--green)':'var(--accent)'}">${label}</div>
+      ${rows}
+    </div>`;
+  }).join('');
+  document.getElementById('att-items').innerHTML=profileHTML+sessHTML;
+}
+function setProfile(field,val) {
+  Object.keys(myEdits).forEach(sid=>{myEdits[sid][field]=val;});
+  renderAttEditor();
+}
+function setProfileWeight(val) {
+  const w=parseFloat(val)||0;
+  Object.keys(myEdits).forEach(sid=>{myEdits[sid].weight=w;});
+}
+function togMyAtt(sid) {
+  if(locked(sessions.find(s=>s.id===sid)||{})){toast('🔒 已截止');return;}
+  myEdits[sid].on=!myEdits[sid].on;
+  renderAttEditor();
+}
+async function saveAtt() {
+  if(!lookupName){toast('請先查詢名字');return;}
+  const anyEdit=Object.values(myEdits).find(e=>e&&e.position)||{position:'右槳',gender:''};
+  const pos=anyEdit.position||'右槳', gen=anyEdit.gender||'', wt=anyEdit.weight||0;
+  if(!members.find(m=>m.name===lookupName)) members.push({name:lookupName,gender:gen,position:pos,weight:wt});
+  else { const m=members.find(m=>m.name===lookupName); m.gender=gen; m.position=pos; m.weight=wt; }
+  visibleSessions().forEach(s=>{
+    if(!locked(s)){
+      const ed=myEdits[s.id]||{on:false};
+      att[`${s.id}__${lookupName}`]={on:ed.on||false,position:pos,gender:gen,weight:wt};
+    }
+  });
+  const ok=await window._fbSave(toCloudData());
+  if(ok) toast(`✅ ${lookupName} 的出席已儲存！`);
+  else toast(`⚠️ 儲存失敗，請再試一次`);
+}
+
+// ─── Sessions ─────────────────────────────────────────────────────
+function renderSessions() {
+  const mks=allMonthKeys(); if(mks.length&&!mks.includes(curMonthKey))curMonthKey=mks[mks.length-1];
+  const nav=document.getElementById('sess-month-nav'); if(nav)nav.innerHTML=mks.length?monthNavHTML():'';
+  const fs=filteredSessions();
+  const tot=fs.reduce((a,s)=>a+getAtt(s.id).length,0);
+  const monthNames=new Set(); fs.forEach(s=>getAtt(s.id).forEach(m=>monthNames.add(m.name)));
+  document.getElementById('stat-s').textContent=fs.length;
+  document.getElementById('stat-m').textContent=monthNames.size;
+  document.getElementById('stat-a').textContent=Math.round(tot/Math.max(fs.length,1));
+  document.getElementById('sess-cards').innerHTML=fs.map(s=>{
+    const a2=getAtt(s.id), pb=published[s.id]||0, lk=locked(s), open=expandSid===s.id;
+    let body='';
+    if(open){
+      const l=a2.filter(m=>m.position==='左槳'), r=a2.filter(m=>m.position==='右槳'), h=a2.filter(m=>m.position==='舵手');
+      const maxRows=Math.max(l.length,r.length,1);
+      const tableRows=Array.from({length:maxRows},(_,i)=>`<tr>
+        <td class="th-n" style="color:var(--text3);font-size:10px">${i+1}</td>
+        <td class="td-l">${l[i]?l[i].name:'<span class="td-empty">—</span>'}</td>
+        <td class="td-r">${r[i]?r[i].name:'<span class="td-empty">—</span>'}</td>
+      </tr>`).join('');
+      const helmH=h.length?`<div class="roster-helm">${h.map(m=>`<div class="roster-helm-item">🚤 ${m.name}</div>`).join('')}</div>`:'';
+      const pubBanner=pb>0?`<div class="pub-banner" style="margin-bottom:8px">✅ 教練已公布 ${pb} 船槳位</div>`:'';
+      body=`<div class="ov-body">${pubBanner}
+        <div class="roster-wrap">
+          <table class="roster-table">
+            <thead><tr><th class="th-n">#</th><th class="th-l">⬅️ 左槳 (${l.length})</th><th class="th-r">➡️ 右槳 (${r.length})</th></tr></thead>
+            <tbody>${tableRows}</tbody>
+          </table>
+          ${helmH}<div class="roster-total">共 ${a2.length} 人出席</div>
+        </div>
+        ${role==='admin'&&pb>0
+          ?`${Array.from({length:pb},(_,bi)=>`${diagHTML(s.id,bi,false)}<button class="copy-btn" style="margin-top:6px" onclick="copyLine('${s.id}',${bi})">📋 複製${BNAMES[bi]}</button>`).join('')}<button class="copy-all-btn" onclick="copyLine('${s.id}','all')">📋 複製全部</button>`
+          :role!=='admin'?`<button class="roster-copy-btn" onclick="copyRoster('${s.id}')">📋 複製出席名單（貼到 LINE）</button>`:''}
+      </div>`;
+    }
+    return`<div class="ov-card">
+      <div class="ov-head" onclick="togExp('${s.id}')">
+        <div><div class="ov-date">${s.date} ${pb>0?'✅':''} ${lk?'🔒':''}</div><div class="ov-meta">${s.time}${s.note?' · '+s.note:''}</div></div>
+        <div class="ov-cnt"><div class="ov-n">${a2.length}</div><div class="ov-nl">人出席</div><div style="color:var(--text3);font-size:10px;margin-top:2px">${open?'▲':'▼'}</div></div>
+      </div>${body}
+    </div>`;
+  }).join('');
+}
+function togExp(sid) { expandSid=expandSid===sid?null:sid; renderSessions(); }
+
+// ─── Boat diagram ─────────────────────────────────────────────────
+function diagHTML(sid,bi,editable) {
+  const drum=seat(sid,bi,'DRUM'), helm=seat(sid,bi,'HELM');
+  function seatEl(pos,name,cls,isSpec){
+    const isSel=editable&&swapSrc&&swapSrc.sid===sid&&swapSrc.bi===bi&&swapSrc.pos===pos;
+    const sc=isSpec?'seat-spec':'seat-pad';
+    const nl=isSpec?(pos==='DRUM'?'鼓手':'舵手'):(pos.slice(1)+(pos[0]==='L'?'左':'右'));
+    const oc=editable?`onclick="tapSeat('${sid}',${bi},'${pos}')"`:'';
+    return`<div class="seat ${sc} ${cls}${isSel?' selected-seat':''}" ${oc}><span class="seat-num">${nl}</span>${name||'—'}</div>`;
+  }
+  const rows=Array.from({length:ROWS},(_,i)=>{
+    const row=i+1, ln=seat(sid,bi,`L${row}`), rn=seat(sid,bi,`R${row}`);
+    return`<div class="bd-row">
+      ${seatEl(`L${row}`,ln,ln?'sl2':'se',false)}
+      <div class="bd-div"><div class="bd-divline"></div></div>
+      ${seatEl(`R${row}`,rn,rn?'sr':'se',false)}
+    </div>`;
+  }).join('');
+  return`<div class="bd-outer">
+    <div style="text-align:center"><span class="bd-label bd-t${bi}">${BNAMES[bi]}</span></div>
+    ${editable?`<div style="text-align:center;font-size:10px;color:var(--text2);margin-bottom:5px">
+      <span style="color:#80eebb">◀ 左槳</span> &nbsp;│&nbsp; <span style="color:#90b8e8">右槳 ▶</span><br>
+      <span style="opacity:.6">點兩個格子互換座位</span>
+      ${swapSrc&&swapSrc.sid===sid&&swapSrc.bi===bi?`<span style="color:#e07800;font-weight:700;margin-left:8px">已選 ${swapSrc.pos} — 再點另一格互換</span>`:''}
+    </div>`:''}
+    <div class="bd-hull">
+      <div class="bd-row" style="margin-bottom:6px">${seatEl('DRUM',drum,drum?'sh':'se',true)}</div>
+      ${rows}
+      <div class="bd-row" style="margin-top:6px">${seatEl('HELM',helm,helm?'sh':'se',true)}</div>
+    </div>
+  </div>`;
+}
+function tapSeat(sid,bi,pos){
+  if(!swapSrc){swapSrc={sid,bi,pos};renderCoach();return;}
+  if(swapSrc.sid===sid&&swapSrc.bi===bi&&swapSrc.pos!==pos){
+    const k1=`${sid}__${bi}__${swapSrc.pos}`, k2=`${sid}__${bi}__${pos}`;
+    const tmp=boatAsgn[k1];
+    if(boatAsgn[k2])boatAsgn[k1]=boatAsgn[k2]; else delete boatAsgn[k1];
+    if(tmp)boatAsgn[k2]=tmp; else delete boatAsgn[k2];
+    save(); toast('✅ 座位已互換');
+  }
+  swapSrc=null; renderCoach();
+}
+
+// ─── LINE text ────────────────────────────────────────────────────
+function lineText(sid,bi){
+  const s=sessions.find(x=>x.id===sid); if(!s)return'';
+  const lines=[`🐉 龍舟槳位表 ─ ${BNAMES[bi]}`,`📅 ${s.date} ${s.time}${s.note?' ('+s.note+')':''}`,``,`排   左槳         右槳`,`──────────────────`];
+  for(let i=1;i<=ROWS;i++){const l=seat(sid,bi,`L${i}`)||'　',r=seat(sid,bi,`R${i}`)||'　';lines.push(` ${String(i).padStart(2)}   ${l.slice(0,5).padEnd(10,'　')}${r}`);}
+  lines.push('──────────────────');
+  const dr=seat(sid,bi,'DRUM'),he=seat(sid,bi,'HELM');
+  if(dr)lines.push(`🥁 鼓手：${dr}`); if(he)lines.push(`🚤 舵手：${he}`);
+  let _lw=0,_rw=0;
+  for(let i=1;i<=ROWS;i++){const ln=seat(sid,bi,`L${i}`);const rn=seat(sid,bi,`R${i}`);if(ln){const mf=members.find(x=>x.name===ln);_lw+=mf?.weight||0;}if(rn){const mf=members.find(x=>x.name===rn);_rw+=mf?.weight||0;}}
+  if(_lw+_rw>0)lines.push(`⚖️ 左側：${Math.round(_lw)}kg ／ 右側：${Math.round(_rw)}kg（差${Math.round(Math.abs(_lw-_rw))}kg）`);
+  return lines.join('\n');
+}
+function allText(sid,bc){return Array.from({length:bc},(_,bi)=>lineText(sid,bi)).join('\n\n────────────────────\n\n')+'\n\n📌 請準時集合！加油！🔥';}
+function copyLine(sid,bi){
+  const t=bi==='all'?allText(sid,published[sid]||cBc):lineText(sid,parseInt(bi));
+  navigator.clipboard.writeText(t).then(()=>toast('✅ 已複製！貼到LINE即可')).catch(()=>toast('複製失敗'));
+}
+function copyRoster(sid){
+  const s=sessions.find(x=>x.id===sid); if(!s)return;
+  const a2=getAtt(sid);
+  const l=a2.filter(m=>m.position==='左槳'),r=a2.filter(m=>m.position==='右槳'),h=a2.filter(m=>m.position==='舵手');
+  const maxRows=Math.max(l.length,r.length,0);
+  const lines=[`🐉 出席名單`,`📅 ${s.date} ${s.time}${s.note?' ('+s.note+')':''}`,`共 ${a2.length} 人`,``,`　　 ⬅️ 左槳　　　➡️ 右槳`,`──────────────────`];
+  for(let i=0;i<maxRows;i++){const lv=l[i]?l[i].name:'　　',rv=r[i]?r[i].name:'';lines.push(` ${String(i+1).padStart(2)}   ${lv.slice(0,6).padEnd(8,'　')}${rv}`);}
+  if(h.length){lines.push('──────────────────');lines.push(`🚤 舵手：${h.map(m=>m.name).join('、')}`);}
+  lines.push(`\n📌 請準時集合！加油！🔥`);
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>toast('✅ 已複製名單！')).catch(()=>toast('複製失敗'));
+}
+
+// ─── Coach ────────────────────────────────────────────────────────
+function renderCoach(){
+  const mks=allMonthKeys(); if(mks.length&&!mks.includes(curMonthKey))curMonthKey=mks[mks.length-1];
+  const nav=document.getElementById('coach-month-nav'); if(nav)nav.innerHTML=mks.length?monthNavHTML():'';
+  const fs=filteredSessions();
+  document.getElementById('coach-list').innerHTML=fs.map(s=>{
+    const a2=getAtt(s.id), open=coachSid===s.id, pb=published[s.id]||0;
+    let inner='';
+    if(open){
+      const bBtns=[1,2,3].map(n=>`<button class="rb ${cBc===n?'sel':''}" onclick="setCBc(${n})">${n} 船</button>`).join('');
+      const bTabs=Array.from({length:cBc},(_,bi)=>`<button class="boat-tab b${bi} ${cBi===bi?'active':''}" onclick="setCBi(${bi})">${BNAMES[bi]}</button>`).join('');
+      const ua=unassigned(s.id,cBc);
+      const poolH=ua.length===0?`<span style="font-size:11px;color:var(--text3)">全員已分配 🎉</span>`
+        :ua.map(m=>{const pc=m.position==='左槳'?'pc-l':m.position==='右槳'?'pc-r':'pc-h';
+          const mw=members.find(x=>x.name===m.name)?.weight||0; return`<div class="pc ${pc} ${selName===m.name?'active-pc':''}" onclick="selPool('${m.name.replace(/'/g,"\\'")}')"><span style="font-size:9px;opacity:.6">${m.position==='左槳'?'左':m.position==='右槳'?'右':'舵'}</span> ${m.name}${mw?` <span style="opacity:.5;font-size:9px">${mw}kg</span>`:''}</div>`;
+        }).join('');
+      const inBoat=members.filter(m=>{const a=memberBoat(s.id,m.name,cBc);return a&&a.bi===cBi;});
+      const rosterH=inBoat.length===0?`<div style="font-size:12px;color:var(--text3);padding:8px 0">尚未指派隊員</div>`
+        :inBoat.map(m=>`<div class="ri ri-${cBi}">
+          <div><span style="font-weight:700;color:${BTXT[cBi]}">${m.name}</span><span style="font-size:10px;opacity:.65;margin-left:4px">${m.position}</span></div>
+          <button class="ri-rm" onclick="rmBoat('${s.id}','${m.name.replace(/'/g,"\\'")}')">✕</button>
+        </div>`).join('');
+      const diagH=showDiag?Array.from({length:cBc},(_,bi)=>diagHTML(s.id,bi,true)).join(''):'';
+      const lineH=showLine?`${Array.from({length:cBc},(_,bi)=>`<div class="line-out">${escH(lineText(s.id,bi))}</div><button class="copy-btn" onclick="copyLine('${s.id}',${bi})">📋 複製${BNAMES[bi]}</button>`).join('')}<button class="copy-all-btn" onclick="copyLine('${s.id}','all')">📋 複製全部</button>`:'';
+      inner=`<div onclick="event.stopPropagation()" style="margin-top:12px">
+        <div class="ig"><div class="lbl">今天出幾船？</div><div class="rbg">${bBtns}</div></div>
+        <div class="boat-tabs">${bTabs}</div>
+        <div style="margin-bottom:10px">
+          <div class="pool-hdr"><span>未分配 (${ua.length}人)</span>${selName?`<span style="color:var(--accent);font-size:11px">✏️ ${selName} → 點右側加入</span>`:''}</div>
+          <div class="pool-box">${poolH}</div>
+        </div>
+        <div style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:10px">
+          <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px">✏️ 臨時調整出席（不受截止限制）</div>
+          <div style="display:flex;gap:6px;margin-bottom:6px">
+            <input class="inp" id="coachAddName_${s.id}" placeholder="輸入隊員名字" style="flex:1;font-size:12px;padding:7px 10px" onkeydown="if(event.key==='Enter')coachAddAtt('${s.id}')">
+            <button onclick="coachAddAtt('${s.id}')" style="background:var(--green);color:#fff;border:none;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">➕ 加入</button>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px">${getAtt(s.id).map(m=>{const mn=m.name;return`<div style="display:flex;align-items:center;gap:3px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:3px 8px;font-size:11px"><span>${mn}</span><button onclick="coachRemoveAtt('${s.id}','${mn}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;padding:0 3px;line-height:1">✕</button></div>`;}).join('')}</div>
+        </div>
+        <div style="margin-bottom:8px">
+          <div class="pool-hdr">
+            <span style="color:${BTXT[cBi]};font-weight:700">${BNAMES[cBi]} 名單</span>
+            <button style="font-size:11px;background:${BBG[cBi]};border:1.5px solid ${BBDR[cBi]};color:${BTXT[cBi]};padding:4px 10px;border-radius:20px;cursor:pointer;font-family:inherit;font-weight:700"
+              onclick="${selName?`addBoat('${s.id}')`:`autoAssign('${s.id}',${cBi},${cBc})`}">
+              ${selName?'➕ 加入此船':'⚡ 自動排'}</button>
+          </div>${rosterH}
+        </div>
+        ${(()=>{
+          let lw=0,rw=0,lc=0,rc=0;
+          for(let bi2=0;bi2<cBc;bi2++){for(let i=1;i<=ROWS;i++){const ln=seat(s.id,bi2,`L${i}`);const rn=seat(s.id,bi2,`R${i}`);if(ln){const mf=members.find(x=>x.name===ln);lw+=mf?.weight||0;lc++;}if(rn){const mf=members.find(x=>x.name===rn);rw+=mf?.weight||0;rc++;}}}
+          const diff=Math.abs(lw-rw);
+          const color=diff<=10?'var(--green)':diff<=20?'var(--orange)':'var(--red)';
+          return lw+rw>0?`<div style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:12px;display:flex;gap:12px;align-items:center">
+            <span>⬅️ 左：<strong>${lw}kg</strong>(${lc}人)</span>
+            <span>➡️ 右：<strong>${rw}kg</strong>(${rc}人)</span>
+            <span style="color:${color};font-weight:700">差值：${Math.round(diff)}kg ${diff<=10?'✅':diff<=20?'⚠️':'❌'}</span>
+          </div>`:''
+        })()}
+        <button class="act-btn a-auto" onclick="togDiag()">${showDiag?'隱藏船位圖 ▲':'👁 查看船位圖（點格子互換）'}</button>
+        ${diagH}
+        <button class="act-btn a-preview" onclick="togLine()">${showLine?'隱藏 ▲':'📋 預覽 LINE 貼文'}</button>
+        ${lineH}
+        <button class="act-btn ${pb?'a-pub-done':'a-pub'}" style="padding:12px;margin-top:4px" onclick="pubBoats('${s.id}',${cBc})">
+          ${pb?`✅ 已公布${pb}船（點此重新公布）`:`📢 公布槳位（${cBc}船）`}
+        </button>
+      </div>`;
+    }
+    return`<div class="srow ${open?'chk':''}" onclick="togCoach('${s.id}')">
+      <div class="srow-in"><div>
+        <div class="sd">${s.date} ${pb>0?'✅':''}</div>
+        <div class="st">${s.time}${s.note?' · '+s.note:''}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">${a2.length} 人出席</div>
+      </div><span style="color:var(--text2);font-size:18px">${open?'▲':'▼'}</span></div>
+      ${inner}
+    </div>`;
+  }).join('');
+}
+function coachAddAtt(sid){
+  const inp=document.getElementById('coachAddName_'+sid);
+  const name=inp.value.trim();
+  if(!name){toast('請輸入名字');return;}
+  // 找到該人的槳位資料，如果 members 裡有就用，否則預設右槳
+  const m=members.find(x=>x.name===name);
+  att[sid+'__'+name]={on:true,position:m?.position||'右槳',gender:m?.gender||'',weight:m?.weight||0};
+  if(!m) members.push({name,position:'右槳',gender:'',weight:0});
+  inp.value='';
+  save(); renderCoach();
+  toast('✅ 已加入 '+name);
+}
+function coachRemoveAtt(sid,name){
+  if(!confirm('確定將「'+name+'」從此場次移除？')){return;}
+  if(att[sid+'__'+name]) att[sid+'__'+name].on=false;
+  // 也從船位移除
+  Object.keys(boatAsgn).forEach(k=>{if(k.startsWith(sid+'__')&&boatAsgn[k]===name)delete boatAsgn[k];});
+  save(); renderCoach();
+  toast('已移除 '+name);
+}
+function togCoach(sid){coachSid=coachSid===sid?null:sid;if(coachSid){cBi=0;cBc=published[sid]||1;selName=null;showDiag=false;showLine=false;swapSrc=null;}renderCoach();}
+function setCBc(n){cBc=n;cBi=0;selName=null;swapSrc=null;renderCoach();}
+function setCBi(bi){cBi=bi;selName=null;swapSrc=null;renderCoach();}
+function selPool(name){selName=selName===name?null:name;renderCoach();}
+function addBoat(sid){
+  if(!selName)return;
+  const m=members.find(x=>x.name===selName);
+  const pref=m?.position==='左槳'?'L':m?.position==='右槳'?'R':null;
+  if(pref){
+    for(let i=1;i<=ROWS;i++){if(!seat(sid,cBi,`${pref}${i}`)){setSeat(sid,cBi,`${pref}${i}`,selName);selName=null;renderCoach();return;}}
+    toast('此船此側已滿');
+  } else {
+    if(!seat(sid,cBi,'HELM')){setSeat(sid,cBi,'HELM',selName);selName=null;renderCoach();return;}
+    if(!seat(sid,cBi,'DRUM')){setSeat(sid,cBi,'DRUM',selName);selName=null;renderCoach();return;}
+    toast('舵手位置已滿');
+  }
+}
+function setSeat(sid,bi,pos,name){Object.keys(boatAsgn).forEach(k=>{if(k.startsWith(`${sid}__`)&&boatAsgn[k]===name)delete boatAsgn[k];});boatAsgn[`${sid}__${bi}__${pos}`]=name;save();}
+function rmBoat(sid,name){Object.keys(boatAsgn).forEach(k=>{if(k.startsWith(`${sid}__`)&&boatAsgn[k]===name)delete boatAsgn[k];});save();renderCoach();}
+function autoAssign(sid,bi,bc){
+  const ua=unassigned(sid,bc);
+  const l=ua.filter(m=>m.position==='左槳'),r=ua.filter(m=>m.position==='右槳'),h=ua.filter(m=>m.position==='舵手');
+  Object.keys(boatAsgn).forEach(k=>{if(k.startsWith(`${sid}__${bi}__`))delete boatAsgn[k];});
+  l.forEach((m,i)=>{if(i<ROWS)boatAsgn[`${sid}__${bi}__L${i+1}`]=m.name;});
+  r.forEach((m,i)=>{if(i<ROWS)boatAsgn[`${sid}__${bi}__R${i+1}`]=m.name;});
+  if(h[0])boatAsgn[`${sid}__${bi}__HELM`]=h[0].name;
+  if(h[1])boatAsgn[`${sid}__${bi}__DRUM`]=h[1].name;
+  save(); toast(`${BNAMES[bi]} 已自動排位`); renderCoach();
+}
+function pubBoats(sid,bc){published[sid]=bc;save();toast('✅ 槳位表已公布！');renderCoach();}
+function togDiag(){showDiag=!showDiag;swapSrc=null;renderCoach();}
+function togLine(){showLine=!showLine;renderCoach();}
+
+// ─── Admin ────────────────────────────────────────────────────────
+function addSession(){
+  const date=document.getElementById('newDateVal').value.trim();
+  const timeSel=document.getElementById('newTimeSel').value;
+  const time=timeSel==='other'?document.getElementById('newTimeCustom').value.trim():timeSel;
+  const note=document.getElementById('newNote').value.trim();
+  if(!date){toast('請選擇日期');return;} if(!time){toast('請選擇或填寫時間');return;}
+  sessions.push({id:'s'+Date.now(),date,time,note});
+  sessions.sort((a,b)=>parseDateNum(a.date)-parseDateNum(b.date));
+  save(); toast('已新增場次');
+  document.getElementById('newDateDisplay').value=''; document.getElementById('newDateVal').value='';
+  document.getElementById('newTimeSel').value='06:00-08:00'; document.getElementById('timeCustom').classList.add('hidden');
+  document.getElementById('newTimeCustom').value=''; document.getElementById('newNote').value=''; calSelDate=null;
+  renderAdmin();
+}
+
+function initBatchSel(){
+  const sel=document.getElementById('batchMonthSel'); if(!sel)return; sel.innerHTML='';
+  const now=new Date();
+  for(let i=0;i<4;i++){
+    const d=new Date(now.getFullYear(),now.getMonth()+i,1);
+    const y=d.getFullYear(),m=d.getMonth()+1;
+    const mk=`${y}-${String(m).padStart(2,'0')}`;
+    const opt=document.createElement('option'); opt.value=mk; opt.textContent=`${y} 年 ${m} 月`;
+    sel.appendChild(opt);
+  }
+  renderBatchPreview();
+}
+function batchDatesForMonth(mk){
+  const[y,m]=mk.split('-').map(Number); const last=new Date(y,m,0).getDate(); const dates=[];
+  for(let d=1;d<=last;d++){const dow=new Date(y,m-1,d).getDay();if(dow===2||dow===6)dates.push(d);}
+  return dates;
+}
+function renderBatchPreview(){
+  const sel=document.getElementById('batchMonthSel'); if(!sel)return;
+  const mk=sel.value; const[y,m]=mk.split('-').map(Number);
+  const dates=batchDatesForMonth(mk); const preview=document.getElementById('batch-preview'); const btn=document.getElementById('batchAddBtn');
+  if(!dates.length){preview.innerHTML='<div style="color:var(--text3);font-size:12px">本月無週二/六</div>';btn.style.display='none';return;}
+  preview.innerHTML=dates.map(d=>{
+    const dow=new Date(y,m-1,d).getDay(); const dateStr=`${y}/${m}/${d}（${WEEKDAYS[dow]}）`;
+    const exists=sessions.some(s=>s.date===dateStr||s.date===`${m}/${d}（${WEEKDAYS[dow]}）`);
+    return`<div class="batch-row${exists?' exists':''}">
+      <input type="checkbox" class="batch-chk" id="bc_${d}" ${exists?'disabled':'checked'} value="${dateStr}">
+      <label for="bc_${d}" class="batch-date" style="cursor:${exists?'default':'pointer'}">${dateStr}</label>
+      ${exists?`<span class="batch-exists-tag">已建立</span>`
+        :`<select class="batch-time-sel" id="bt_${d}">
+          <option value="06:00-08:00">06:00-08:00</option>
+          <option value="06:00-07:00">06:00-07:00</option>
+          <option value="07:00-08:00">07:00-08:00</option>
+        </select>
+        <input class="batch-note-inp" id="bn_${d}" placeholder="備注" maxlength="12">`}
+    </div>`;
+  }).join(''); btn.style.display='block';
+}
+function batchAdd(){
+  const sel=document.getElementById('batchMonthSel'); const mk=sel.value; const[y,m]=mk.split('-').map(Number);
+  const dates=batchDatesForMonth(mk); let added=0;
+  dates.forEach(d=>{
+    const chk=document.getElementById(`bc_${d}`); if(!chk||!chk.checked||chk.disabled)return;
+    const dow=new Date(y,m-1,d).getDay(); const dateStr=`${y}/${m}/${d}（${WEEKDAYS[dow]}）`;
+    const time=document.getElementById(`bt_${d}`)?.value||'06:00-08:00';
+    const note=document.getElementById(`bn_${d}`)?.value.trim()||'';
+    sessions.push({id:'s'+Date.now()+'_'+d,date:dateStr,time,note}); added++;
+  });
+  if(!added){toast('未勾選任何場次');return;}
+  sessions.sort((a,b)=>parseDateNum(a.date)-parseDateNum(b.date));
+  save(); toast(`✅ 已新增 ${added} 個場次`); renderBatchPreview(); renderAdmin();
+}
+
+function openEditSess(sid){
+  editSid=sid; const s=sessions.find(x=>x.id===sid); if(!s)return;
+  document.getElementById('editSessDate').textContent=s.date;
+  document.getElementById('editSessTime').value=['06:00-08:00','06:00-07:00','07:00-08:00'].includes(s.time)?s.time:'other';
+  document.getElementById('editSessTimeCustom').value=s.time;
+  document.getElementById('editSessNote').value=s.note||'';
+  handleEditTimeSel(); document.getElementById('editSessModal').style.display='flex';
+}
+function handleEditTimeSel(){const v=document.getElementById('editSessTime').value;document.getElementById('editSessCustomRow').style.display=v==='other'?'block':'none';}
+function saveEditSess(){
+  const s=sessions.find(x=>x.id===editSid); if(!s)return;
+  const tv=document.getElementById('editSessTime').value;
+  s.time=tv==='other'?document.getElementById('editSessTimeCustom').value.trim():tv;
+  s.note=document.getElementById('editSessNote').value.trim();
+  if(!s.time){toast('請填時間');return;}
+  save(); toast('✅ 已更新'); document.getElementById('editSessModal').style.display='none'; renderAdmin();
+}
+function renderAdmin(){
+  // 渲染隊員名單
+  const mlEl=document.getElementById('member-list-admin');
+  if(mlEl){
+    if(!members.length){mlEl.innerHTML='<div style="color:var(--text3);font-size:12px">尚無隊員</div>';}
+    else{mlEl.innerHTML=members.map(m=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;background:var(--bg3);border-radius:6px;margin-bottom:4px">
+      <div style="font-size:13px;font-weight:500">${m.name} <span style="font-size:10px;color:var(--text3)">${m.position||''} ${m.weight?Math.round(m.weight)+'kg':''}</span></div>
+      <button onclick="delMember('${m.name.replace(/'/g,"\'")}');event.stopPropagation()" style="background:transparent;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:2px 6px">🗑</button>
+    </div>`).join('');}
+  }
+  const _savedMk=curMonthKey;
+  const admNav=document.getElementById('adm-month-nav');
+  if(admNav){const mks=allMonthKeys();admNav.innerHTML=mks.length?monthNavHTML():'';}
+  curMonthKey=_savedMk;
+  const srch=document.getElementById('adminSrch')?.value||'';
+  const fm=members.filter(m=>m.name.includes(srch));
+  const fs=filteredSessions();
+  document.getElementById('admin-list').innerHTML=fs.length===0
+    ?`<div style="text-align:center;color:var(--text3);padding:16px;font-size:13px">本月無場次，請用上方批次產生</div>`
+    :fs.map(s=>{
+      const open=adminExpSid===s.id, lk=locked(s);
+      const mH=open?fm.map(m=>{
+        const on=isAtt(s.id,m.name); const pc=m.position==='左槳'?'pb-l':m.position==='右槳'?'pb-r':'pb-h';
+        return`<div class="mem-row">
+          <div style="display:flex;align-items:center;gap:7px">
+            <span style="font-size:13px;font-weight:500">${m.name}</span>
+            <span class="pbadge ${pc}">${m.position||'未知'}</span>
+          </div>
+          <button class="tog ${on?'on':'off'}" onclick="togAdm('${s.id}','${m.name.replace(/'/g,"\\'")}')"></button>
+        </div>`;
+      }).join(''):'';
+      return`<div class="adm-card">
+        <div class="adm-head" onclick="togAdmExp('${s.id}')">
+          <div>
+            <div style="font-weight:700;font-size:14px">${s.date}</div>
+            <div style="font-size:11px;color:var(--text2)">${s.time}${s.note?' · '+s.note:''}　出席 ${getAtt(s.id).length}人${lk?' · 🔒':''}</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="del-btn" title="編輯" onclick="event.stopPropagation();openEditSess('${s.id}')">✏️</button>
+            <button class="del-btn" onclick="event.stopPropagation();delSess('${s.id}')">🗑</button>
+            <span style="color:var(--text2)">${open?'▲':'▼'}</span>
+          </div>
+        </div>
+        ${open?`<div class="adm-body">${mH}</div>`:''}
+      </div>`;
+    }).join('');
+}
+function togAdmExp(sid){adminExpSid=adminExpSid===sid?null:sid;renderAdmin();}
+function togAdm(sid,name){const d=attData(sid,name);att[`${sid}__${name}`]={on:!d.on,position:d.position,gender:d.gender};save();renderAdmin();}
+function delMember(name){
+  if(!confirm(`確定刪除隊員「${name}」？將同時清除所有出席記錄，不可復原`))return;
+  members=members.filter(m=>m.name!==name);
+  // 清除所有出席記錄（key格式為 sessionId__姓名）
+  Object.keys(att).forEach(k=>{
+    const parts=k.split('__');
+    if(parts.length>=2 && parts.slice(1).join('__')===name) delete att[k];
+  });
+  // 清除船位記錄
+  Object.keys(boatAsgn).forEach(k=>{ if(boatAsgn[k]===name) delete boatAsgn[k]; });
+  save(); renderAdmin();
+  toast(`已刪除 ${name} 及所有出席記錄`);
+}
+function delSess(id){
+  if(!confirm('確定刪除這個場次？'))return;
+  sessions=sessions.filter(x=>x.id!==id);
+  [att,boatAsgn].forEach(o=>Object.keys(o).forEach(k=>{if(k.startsWith(id+'__'))delete o[k];}));
+  save(); renderAdmin();
+}
+function exportData(){
+  const txt=JSON.stringify({s:sessions,m:members,a:att,b:boatAsgn,p:published,f:fees,g:gearOrders,t:transactions});
+  navigator.clipboard.writeText(txt).then(()=>toast('✅ 已複製到剪貼簿！傳給自己保存')).catch(()=>toast('複製失敗'));
+}
+function showImport(){document.getElementById('importTxt').value='';document.getElementById('importModal').style.display='flex';}
+function doImport(){
+  try{
+    const d=JSON.parse(document.getElementById('importTxt').value.trim());
+    if(!d.s)throw 0;
+    fromCloudData(d);
+    save(); document.getElementById('importModal').style.display='none';
+    toast('✅ 匯入成功！已同步到雲端'); renderCur();
+  }catch{toast('格式錯誤，請重新匯出');}
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ─── Finance Module ────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+let fees = {};         // {name__period: {paid:bool, amount:2500, last5:'', date:''}}
+let gearOrders = {};   // {orderId: {name, items:[{type,qty,size,price}], status:'pending'|'paid'|'delivered', date, last5}}
+let transactions = []; // [{id,type:'income'|'expense',cat,desc,amount,date}]
+let gearPrices = {uniform:380, life:950, pad:180};
+let curFinTab = 'fee';
+let txnCalYear = new Date().getFullYear(), txnCalMonth = new Date().getMonth(), txnCalSelDate = null;
+let selfGearEdit = {};  // {uniform:0, life:0, pad:0, uniformSize:'', custom:0}
+
+// ─── Finance helpers ──────────────────────────────────────────────
+function currentPeriod() {
+  const now = new Date();
+  return now.getMonth() < 6 ? `${now.getFullYear()}-上半年` : `${now.getFullYear()}-下半年`;
+}
+function allPeriods() {
+  const now = new Date(); const y = now.getFullYear();
+  const periods = [];
+  for(let yr = y-1; yr <= y+1; yr++) {
+    periods.push(`${yr}-上半年`); periods.push(`${yr}-下半年`);
+  }
+  return periods;
+}
+function periodLabel(p) { return p.replace('-上半年',' 上半年（1-6月）').replace('-下半年',' 下半年（7-12月）'); }
+function feeSummary() {
+  const p = document.getElementById('feePeriodFilter')?.value || currentPeriod();
+  const total = members.length;
+  const paid = members.filter(m=>fees[`${m.name}__${p}`]?.paid).length;
+  const unpaid = total - paid;
+  const income = members.filter(m=>fees[`${m.name}__${p}`]?.paid)
+    .reduce((a,m)=>a+(fees[`${m.name}__${p}`]?.amount||2500),0);
+  return {total, paid, unpaid, income};
+}
+function txnSummary(period) {
+  const txns = period ? transactions.filter(t=>t.period===period) : transactions;
+  const income = txns.filter(t=>t.type==='income').reduce((a,t)=>a+t.amount,0);
+  const expense = txns.filter(t=>t.type==='expense').reduce((a,t)=>a+t.amount,0);
+  return {income, expense, balance: income - expense};
+}
+function gearOrderTotal(order) {
+  return order.items.reduce((a,i)=>a+i.price*i.qty, 0);
+}
+function pendingGearAmt() {
+  return Object.values(gearOrders)
+    .filter(o=>o.status==='pending')
+    .reduce((a,o)=>a+gearOrderTotal(o),0);
+}
+
+// ─── Finance tab navigation ───────────────────────────────────────
+function setFinTab(tab) {
+  curFinTab = tab;
+  ['fee','gear','txn','report'].forEach(t=>{
+    document.getElementById('fin-'+t+'-tab').style.display = t===tab ? '' : 'none';
+    document.getElementById('ftab-'+t).classList.toggle('active', t===tab);
+  });
+  renderFinance();
+}
+
+// ─── Finance render ───────────────────────────────────────────────
+function renderFinance() {
+  renderFinSummary();
+  if(curFinTab==='fee') renderFeePage();
+  if(curFinTab==='gear') renderGearPage();
+  if(curFinTab==='txn') renderTxnPage();
+  if(curFinTab==='report') renderReport();
+}
+
+function renderFinSummary() {
+  const sumEl = document.getElementById('fin-summary'); if(!sumEl) return;
+  const p = document.getElementById('feePeriodFilter')?.value || currentPeriod();
+  const fs = feeSummary();
+  const ts = txnSummary();
+  const pending = pendingGearAmt();
+  document.getElementById('fin-summary').innerHTML = `
+    <div class="fin-sum-box"><div class="fin-sum-n income">$${ts.income.toLocaleString()}</div><div class="fin-sum-l">總收入</div></div>
+    <div class="fin-sum-box"><div class="fin-sum-n expense">$${ts.expense.toLocaleString()}</div><div class="fin-sum-l">總支出</div></div>
+    <div class="fin-sum-box"><div class="fin-sum-n balance">$${ts.balance.toLocaleString()}</div><div class="fin-sum-l">結餘</div></div>
+    <div class="fin-sum-box"><div class="fin-sum-n unpaid">${fs.unpaid}</div><div class="fin-sum-l">未繳隊費人數</div></div>`;
+}
+
+function renderFeePage() {
+  // 初始化期間選單
+  const pSel = document.getElementById('feePeriodFilter');
+  const curP = pSel.value || currentPeriod();
+  if(!pSel.options.length) {
+    allPeriods().forEach(p=>{
+      const o = document.createElement('option'); o.value=p; o.textContent=periodLabel(p);
+      if(p===currentPeriod()) o.selected=true;
+      pSel.appendChild(o);
+    });
+  }
+  const period = pSel.value || currentPeriod();
+  const statusF = document.getElementById('feeStatusFilter')?.value || 'all';
+  const feeAmt = parseInt(prompt._feeAmt||2500);
+  
+  let html = `<div style="background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:10px">
+    <div style="font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:700">💡 本期隊費金額</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <input class="price-inp" type="number" id="feeAmtInp" value="${fees._feeAmt||2500}" min="0" style="width:100px">
+      <span style="font-size:12px;color:var(--text2)">元/人</span>
+      <button onclick="saveFeeAmt()" style="background:var(--accent);color:#fff;border:none;padding:6px 12px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer">設定</button>
+    </div>
+  </div>`;
+  
+  const filtered = members.filter(m=>{
+    const f = fees[`${m.name}__${period}`];
+    if(statusF==='paid') return f?.paid;
+    if(statusF==='unpaid') return !f?.paid;
+    return true;
+  });
+  
+  filtered.forEach(m=>{
+    const key = `${m.name}__${period}`;
+    const f = fees[key] || {};
+    const isPaid = f.paid||false;
+    const amt = f.amount || fees._feeAmt || 2500;
+    const last5 = f.last5||'';
+    const date = f.date||'';
+    html += `<div class="fee-row">
+      <div style="flex:1;min-width:0">
+        <div class="fee-name">${m.name}</div>
+        <div class="fee-nick">${m.position||''} ${m.gender||''}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        ${isPaid ? `<span class="fee-last5">${last5||'—'}</span>` : ''}
+        <span class="fee-badge ${isPaid?'fb-paid':'fb-unpaid'}">${isPaid?`✅ 已繳`:`未繳`}</span>
+        <button onclick="openFeeEdit('${m.name.replace(/'/g,"\'")}','${period}')" 
+          style="background:var(--bg3);border:1.5px solid var(--border);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;font-family:inherit;color:var(--text2)">
+          ${isPaid?'修改':'登記'}
+        </button>
+      </div>
+    </div>`;
+  });
+  
+  const fs = feeSummary();
+  html += `<div style="background:var(--green-bg);border:1.5px solid var(--green-bd);border-radius:9px;padding:10px 14px;margin-top:8px;font-size:12px">
+    <strong style="color:var(--green)">✅ 已繳 ${fs.paid} 人（$${fs.income.toLocaleString()}）　⏳ 未繳 ${fs.unpaid} 人</strong>
+  </div>`;
+  
+  document.getElementById('fin-fee-list').innerHTML = html;
+}
+
+function saveFeeAmt() {
+  const v = parseInt(document.getElementById('feeAmtInp')?.value)||2500;
+  fees._feeAmt = v;
+  save(); toast(`✅ 隊費金額已設為 ${v} 元`);
+}
+
+function openFeeEdit(name, period) {
+  const key = `${name}__${period}`;
+  const f = fees[key]||{};
+  const amt = f.amount || fees._feeAmt || 2500;
+  const last5 = f.last5||'';
+  const paid = f.paid||false;
+
+  // 使用簡單的 prompt 替代方式：直接做 inline 編輯 modal
+  document.getElementById('feeEditModal') && document.getElementById('feeEditModal').remove();
+  const div = document.createElement('div');
+  div.id = 'feeEditModal';
+  div.className = 'overlay';
+  div.style.display = 'flex';
+  div.innerHTML = `<div class="modal">
+    <div class="modal-title">💰 隊費登記 — ${name}</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:12px">${periodLabel(period)}</div>
+    <div class="ig" style="margin-bottom:10px">
+      <label class="lbl">金額（元）</label>
+      <input class="inp" type="number" id="feeEditAmt" value="${amt}" min="0">
+    </div>
+    <div class="ig" style="margin-bottom:10px">
+      <label class="lbl">匯款帳號後5碼</label>
+      <input class="inp" id="feeEditLast5" placeholder="如：12345" maxlength="8" value="${last5}" style="font-family:monospace;letter-spacing:2px">
+    </div>
+    <div class="ig" style="margin-bottom:10px">
+      <label class="lbl">繳費日期</label>
+      <input class="inp" id="feeEditDate" type="date" value="${f.date||new Date().toISOString().slice(0,10)}">
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <button class="rb ${paid?'':'sel'}" onclick="this.classList.add('sel');this.nextSibling.classList.remove('sel');document.getElementById('feeEditPaid').value='0'">❌ 未繳</button>
+      <button class="rb ${paid?'sel':''}" onclick="this.classList.add('sel');this.previousSibling.classList.remove('sel');document.getElementById('feeEditPaid').value='1'">✅ 已繳</button>
+    </div>
+    <input type="hidden" id="feeEditPaid" value="${paid?'1':'0'}">
+    <div class="m-btns">
+      <button class="m-cancel" onclick="document.getElementById('feeEditModal').remove()">取消</button>
+      <button class="m-confirm" onclick="saveFeeEdit('${name.replace(/'/g,"\'")}','${period}')">儲存</button>
+    </div>
+  </div>`;
+  document.body.appendChild(div);
+}
+
+function saveFeeEdit(name, period) {
+  const key = `${name}__${period}`;
+  const amt = parseInt(document.getElementById('feeEditAmt')?.value)||2500;
+  const last5 = document.getElementById('feeEditLast5')?.value.trim()||'';
+  const date = document.getElementById('feeEditDate')?.value||'';
+  const paid = document.getElementById('feeEditPaid')?.value === '1';
+  fees[key] = {paid, amount:amt, last5, date};
+  // 同步加入收支紀錄（若是標為已繳）
+  if(paid) {
+    const txnId = `fee__${name}__${period}`;
+    const existing = transactions.findIndex(t=>t.id===txnId);
+    const txnObj = {id:txnId, type:'income', cat:'隊費', desc:`${name} ${periodLabel(period)}`, amount:amt, date, period};
+    if(existing>=0) transactions[existing]=txnObj; else transactions.push(txnObj);
+  }
+  document.getElementById('feeEditModal')?.remove();
+  save(); toast(`✅ 已更新 ${name} 的繳費狀態`);
+  renderFinance();
+}
+
+function renderGearPage() {
+  const statusF = document.getElementById('gearStatusFilter')?.value || 'all';
+  // 更新價格欄位
+  document.getElementById('priceUniform').value = gearPrices.uniform||380;
+  document.getElementById('priceLife').value = gearPrices.life||950;
+  document.getElementById('pricePad').value = gearPrices.pad||180;
+
+  const orders = Object.entries(gearOrders).filter(([id,o])=>{
+    if(statusF==='pending') return o.status==='pending';
+    if(statusF==='paid') return o.status==='paid';
+    if(statusF==='delivered') return o.status==='delivered';
+    return true;
+  }).sort((a,b)=>b[0].localeCompare(a[0]));
+
+  let html = '';
+  if(!orders.length) html = `<div style="text-align:center;color:var(--text3);padding:20px;font-size:13px">無訂單</div>`;
+  orders.forEach(([id,o])=>{
+    const total = gearOrderTotal(o);
+    const statusMap = {pending:'⏳ 待繳費',paid:'✅ 已付款',delivered:'📦 已交貨'};
+    const statusCls = {pending:'fb-unpaid',paid:'fb-paid',delivered:'fb-trial'};
+    const itemsHtml = o.items.map(i=>`${i.type}${i.size?' ('+i.size+')':''} ×${i.qty} $${i.price}`).join('、');
+    html += `<div class="gear-row">
+      <div class="gear-info">
+        <div class="gear-name">${o.name}</div>
+        <div class="gear-items">${itemsHtml}</div>
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">${o.date||''} ${o.last5?'後5碼：'+o.last5:''}</div>
+      </div>
+      <div class="gear-status">
+        <div class="gear-total">$${total.toLocaleString()}</div>
+        <span class="fee-badge ${statusCls[o.status]||'fb-unpaid'}">${statusMap[o.status]||'待處理'}</span>
+        <div style="display:flex;gap:4px;margin-top:4px">
+          ${o.status==='pending'?`<button onclick="setGearStatus('${id}','paid')" style="font-size:10px;background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd);border-radius:5px;padding:2px 7px;cursor:pointer">✅付款</button>`:''}
+          ${o.status==='paid'?`<button onclick="setGearStatus('${id}','delivered')" style="font-size:10px;background:#e8eeff;color:#3355cc;border:1px solid #aabbff;border-radius:5px;padding:2px 7px;cursor:pointer">📦交貨</button>`:''}
+          <button onclick="delGearOrder('${id}')" style="font-size:10px;background:transparent;color:var(--red);border:1px solid rgba(192,0,0,.2);border-radius:5px;padding:2px 7px;cursor:pointer">刪</button>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  // 加入手動新增訂單
+  html += `<div class="add-form" style="margin-top:10px">
+    <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px">✏️ 手動新增訂單</div>
+    <div class="ig" style="margin-bottom:8px">
+      <input class="inp" id="newGearName" placeholder="隊員姓名" list="memberList">
+      <datalist id="memberList">${members.map(m=>`<option value="${m.name}">`).join('')}</datalist>
+    </div>
+    <div style="margin-bottom:8px">
+      ${['uniform','life','pad'].map(k=>{
+        const labels={uniform:'隊服',life:'救生衣',pad:'屁墊'};
+        return `<div class="price-inp-row">
+          <span class="price-inp-label">${labels[k]}</span>
+          <button class="qty-btn" onclick="adjGearQty('${k}',-1)">−</button>
+          <span class="qty-val" id="newGearQty_${k}">0</span>
+          <button class="qty-btn" onclick="adjGearQty('${k}',1)">+</button>
+          <span style="font-size:11px;color:var(--text3)">×$${gearPrices[k]||0}</span>
+          ${k==='uniform'?`<input class="gear-qty" id="newGearSize_${k}" placeholder="尺寸" style="width:60px;margin-left:4px">`:''}
+        </div>`;
+      }).join('')}
+      <div class="price-inp-row">
+        <span class="price-inp-label">自訂</span>
+        <input class="price-inp" id="newGearCustomName" placeholder="品項" style="width:70px">
+        <button class="qty-btn" onclick="adjGearQty('custom',-1)">−</button>
+        <span class="qty-val" id="newGearQty_custom">0</span>
+        <button class="qty-btn" onclick="adjGearQty('custom',1)">+</button>
+        <input class="price-inp" id="newGearCustomPrice" type="number" placeholder="單價" style="width:70px">
+      </div>
+    </div>
+    <div class="ig" style="margin-bottom:8px">
+      <input class="inp" id="newGearLast5" placeholder="匯款後5碼（選填）" maxlength="8" style="font-family:monospace">
+    </div>
+    <button class="add-btn" onclick="addGearOrder()">➕ 新增訂單</button>
+  </div>`;
+
+  document.getElementById('fin-gear-list').innerHTML = html;
+  // 恢復 qty 狀態
+  ['uniform','life','pad','custom'].forEach(k=>{
+    const el = document.getElementById('newGearQty_'+k);
+    if(el) el.textContent = window._newGearQtys?.[k]||0;
+  });
+}
+
+window._newGearQtys = {uniform:0,life:0,pad:0,custom:0};
+function adjGearQty(k, delta) {
+  if(!window._newGearQtys) window._newGearQtys={uniform:0,life:0,pad:0,custom:0};
+  window._newGearQtys[k] = Math.max(0, (window._newGearQtys[k]||0)+delta);
+  const el = document.getElementById('newGearQty_'+k);
+  if(el) el.textContent = window._newGearQtys[k];
+}
+
+function saveGearPrices() {
+  gearPrices.uniform = parseInt(document.getElementById('priceUniform')?.value)||380;
+  gearPrices.life = parseInt(document.getElementById('priceLife')?.value)||950;
+  gearPrices.pad = parseInt(document.getElementById('pricePad')?.value)||180;
+  save();
+}
+
+function addGearOrder() {
+  const name = document.getElementById('newGearName')?.value.trim();
+  if(!name){toast('請輸入姓名');return;}
+  const qtys = window._newGearQtys||{};
+  const items = [];
+  if(qtys.uniform>0) items.push({type:'隊服',qty:qtys.uniform,size:document.getElementById('newGearSize_uniform')?.value||'',price:gearPrices.uniform||380});
+  if(qtys.life>0) items.push({type:'救生衣',qty:qtys.life,size:'',price:gearPrices.life||950});
+  if(qtys.pad>0) items.push({type:'屁墊',qty:qtys.pad,size:'',price:gearPrices.pad||180});
+  const cn = document.getElementById('newGearCustomName')?.value.trim();
+  const cp = parseInt(document.getElementById('newGearCustomPrice')?.value)||0;
+  if(qtys.custom>0 && cn) items.push({type:cn,qty:qtys.custom,size:'',price:cp});
+  if(!items.length){toast('請至少選一項裝備');return;}
+  const last5 = document.getElementById('newGearLast5')?.value.trim()||'';
+  const id = 'go'+Date.now();
+  gearOrders[id] = {name, items, status:'pending', date:new Date().toISOString().slice(0,10), last5};
+  window._newGearQtys = {uniform:0,life:0,pad:0,custom:0};
+  save(); toast('✅ 訂單已建立'); renderGearPage();
+}
+
+function setGearStatus(id, status) {
+  if(!gearOrders[id])return;
+  gearOrders[id].status = status;
+  if(status==='paid') {
+    const o = gearOrders[id];
+    const total = gearOrderTotal(o);
+    const txnId = `gear__${id}`;
+    const existing = transactions.findIndex(t=>t.id===txnId);
+    const txnObj = {id:txnId,type:'income',cat:'裝備款',desc:`${o.name} 裝備款`,amount:total,date:o.date,period:currentPeriod()};
+    if(existing>=0) transactions[existing]=txnObj; else transactions.push(txnObj);
+  }
+  save(); toast('✅ 已更新狀態'); renderGearPage(); renderFinSummary();
+}
+
+function delGearOrder(id) {
+  if(!confirm('確定刪除此訂單？'))return;
+  delete gearOrders[id];
+  transactions = transactions.filter(t=>t.id!==`gear__${id}`);
+  save(); renderGearPage(); renderFinSummary();
+}
+
+function renderTxnPage() {
+  // 設定日曆預設今天
+  if(!txnCalSelDate) {
+    const t=new Date(); txnCalSelDate={y:t.getFullYear(),m:t.getMonth(),d:t.getDate()};
+    const ds=`${t.getFullYear()}/${t.getMonth()+1}/${t.getDate()}`;
+    const el=document.getElementById('txnDateDisplay');
+    if(el && !el.value) { el.value=ds; document.getElementById('txnDateVal').value=ds; }
+  }
+  txnTypeChange();
+  const sorted = [...transactions].filter(t=>t.type&&t.amount).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  let html = '';
+  if(!sorted.length) html = `<div style="text-align:center;color:var(--text3);padding:20px;font-size:13px">尚無收支紀錄</div>`;
+  sorted.forEach(t=>{
+    const icon = t.type==='income' ? '💚' : '🔴';
+    html += `<div class="txn-row">
+      <span class="txn-icon">${icon}</span>
+      <div class="txn-info">
+        <div class="txn-desc">${t.cat} — ${t.desc||''}</div>
+        <div class="txn-date">${t.date||''}</div>
+      </div>
+      <div class="txn-amt ${t.type==='income'?'pos':'neg'}">${t.type==='income'?'+':'-'}$${(t.amount||0).toLocaleString()}</div>
+      <button class="txn-del" onclick="delTxn('${t.id}')">🗑</button>
+    </div>`;
+  });
+  document.getElementById('fin-txn-list').innerHTML = html;
+}
+
+function txnTypeChange() {
+  const v = document.getElementById('txnType')?.value;
+  const catSel = document.getElementById('txnCat');
+  if(!catSel) return;
+  const incCats = ['隊費','裝備款','比賽補助','獎金','捐贈','其他收入'];
+  const expCats = ['報名費','場地費','教練費','餐費','其他支出'];
+  const cats = v==='income' ? incCats : expCats;
+  const cur = catSel.value;
+  catSel.innerHTML = cats.map(c=>`<option value="${c}" ${c===cur?'selected':''}>${c}</option>`).join('');
+}
+
+function addTxn() {
+  const type = document.getElementById('txnType')?.value;
+  const amt = parseInt(document.getElementById('txnAmt')?.value)||0;
+  const cat = document.getElementById('txnCat')?.value||'';
+  const desc = document.getElementById('txnDesc')?.value.trim()||'';
+  const date = document.getElementById('txnDateVal')?.value || new Date().toISOString().slice(0,10);
+  if(!amt){toast('請輸入金額');return;}
+  const period = currentPeriod();
+  transactions.push({id:'t'+Date.now(), type, cat, desc, amount:amt, date, period});
+  document.getElementById('txnAmt').value='';
+  document.getElementById('txnDesc').value='';
+  save(); toast('✅ 已新增收支'); renderTxnPage(); renderFinSummary();
+}
+
+function delTxn(id) {
+  if(!confirm('確定刪除此紀錄？'))return;
+  transactions = transactions.filter(t=>t.id!==id);
+  save(); renderTxnPage(); renderFinSummary();
+}
+
+// ─── Report ───────────────────────────────────────────────────────
+function renderReport() {
+  const rSel = document.getElementById('reportPeriod');
+  const periods = allPeriods().filter(p=>transactions.some(t=>t.period===p) || Object.keys(fees).some(k=>k.endsWith('__'+p)));
+  if(!rSel.options.length) {
+    [...periods, currentPeriod()].filter((v,i,a)=>a.indexOf(v)===i).forEach(p=>{
+      const o=document.createElement('option'); o.value=p; o.textContent=periodLabel(p);
+      if(p===currentPeriod()) o.selected=true;
+      rSel.appendChild(o);
+    });
+  }
+  const period = rSel.value || currentPeriod();
+  const ts = txnSummary(period);
+  const incomes = transactions.filter(t=>t.period===period&&t.type==='income');
+  const expenses = transactions.filter(t=>t.period===period&&t.type==='expense');
+  
+  // 隊費統計
+  const paidMembers = members.filter(m=>fees[`${m.name}__${period}`]?.paid);
+  const feeTotal = paidMembers.reduce((a,m)=>a+(fees[`${m.name}__${period}`]?.amount||fees._feeAmt||2500),0);
+
+  let html = `<div class="fin-report-box">
+    <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px">💚 收入 $${ts.income.toLocaleString()}</div>`;
+  
+  const incCats = {};
+  incomes.forEach(t=>{ incCats[t.cat] = (incCats[t.cat]||0)+t.amount; });
+  Object.entries(incCats).forEach(([cat,amt])=>{
+    html += `<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid var(--border)"><span>${cat}</span><span>$${amt.toLocaleString()}</span></div>`;
+  });
+  
+  html += `</div><div class="fin-report-box">
+    <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:8px">🔴 支出 $${ts.expense.toLocaleString()}</div>`;
+  
+  const expCats = {};
+  expenses.forEach(t=>{ expCats[t.cat] = (expCats[t.cat]||0)+t.amount; });
+  Object.entries(expCats).forEach(([cat,amt])=>{
+    html += `<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid var(--border)"><span>${cat}</span><span>$${amt.toLocaleString()}</span></div>`;
+  });
+  
+  html += `</div><div class="fin-report-box" style="border-color:var(--accent)">
+    <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:900;color:var(--accent)">
+      <span>結餘</span><span>$${ts.balance.toLocaleString()}</span>
+    </div>
+  </div>
+  <div class="fin-report-box">
+    <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:6px">🏷 隊費狀況</div>
+    <div style="font-size:12px">已繳 ${paidMembers.length}/${members.length} 人 ／ 總計 $${feeTotal.toLocaleString()}</div>
+    ${members.filter(m=>!fees[`${m.name}__${period}`]?.paid).map(m=>`<span style="font-size:11px;color:var(--red);background:rgba(192,0,0,.07);border-radius:4px;padding:1px 6px;display:inline-block;margin:2px">${m.name}</span>`).join('')}
+  </div>`;
+  
+  document.getElementById('fin-report-content').innerHTML = html;
+}
+
+function copyReport() {
+  const period = document.getElementById('reportPeriod')?.value || currentPeriod();
+  const ts = txnSummary(period);
+  const incomes = transactions.filter(t=>t.period===period&&t.type==='income');
+  const expenses = transactions.filter(t=>t.period===period&&t.type==='expense');
+  const paidMembers = members.filter(m=>fees[`${m.name}__${period}`]?.paid);
+  const feeTotal = paidMembers.reduce((a,m)=>a+(fees[`${m.name}__${period}`]?.amount||fees._feeAmt||2500),0);
+  const unpaid = members.filter(m=>!fees[`${m.name}__${period}`]?.paid);
+  
+  const incCats={}, expCats={};
+  incomes.forEach(t=>{ incCats[t.cat]=(incCats[t.cat]||0)+t.amount; });
+  expenses.forEach(t=>{ expCats[t.cat]=(expCats[t.cat]||0)+t.amount; });
+
+  const lines = [
+    `🐉 胸腔戰士龍舟隊 財務報告`,
+    `📅 ${periodLabel(period)}`,
+    ``,
+    `💚 收入　$${ts.income.toLocaleString()}`,
+    `─────────────────`,
+    ...Object.entries(incCats).map(([c,a])=>`  ${c.padEnd(6,'　')}$${a.toLocaleString()}`),
+    ``,
+    `🔴 支出　$${ts.expense.toLocaleString()}`,
+    `─────────────────`,
+    ...Object.entries(expCats).map(([c,a])=>`  ${c.padEnd(6,'　')}$${a.toLocaleString()}`),
+    ``,
+    `💰 結餘　$${ts.balance.toLocaleString()}`,
+    ``,
+    `🏷 隊費：已繳 ${paidMembers.length}/${members.length} 人 ／ $${feeTotal.toLocaleString()}`,
+    unpaid.length ? `⏳ 未繳：${unpaid.map(m=>m.name).join('、')}` : `✅ 全員已繳`,
+    ``,
+    `📌 如有疑問請聯繫總務`,
+  ];
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>toast('✅ 已複製財報！貼到LINE即可')).catch(()=>toast('複製失敗'));
+}
+
+// ─── 隊員自助裝備 ────────────────────────────────────────────────
+function renderSelfSections(name) {
+  // 裝備訂購
+  const gearSec = document.getElementById('self-gear-section');
+  const feeSec = document.getElementById('self-fee-section');
+  if(!gearSec||!feeSec) return;
+  gearSec.style.display = 'block'; feeSec.style.display = 'block';
+  
+  // 裝備
+  if(!selfGearEdit._name || selfGearEdit._name !== name) {
+    selfGearEdit = {_name:name, uniform:0, life:0, pad:0, uniformSize:'', custom:0, customName:'', customPrice:0};
+  }
+  
+  const gearItems = [
+    {key:'uniform',label:'隊服',price:gearPrices.uniform||380,hasSize:true},
+    {key:'life',label:'救生衣',price:gearPrices.life||950,hasSize:false},
+    {key:'pad',label:'屁墊',price:gearPrices.pad||180,hasSize:false},
+  ];
+  
+  document.getElementById('self-gear-items').innerHTML = `
+    <div style="font-size:11px;color:var(--text2);margin-bottom:8px;line-height:1.6">選擇要購買的裝備，總務確認收款後標記付款。</div>
+    ${gearItems.map(g=>`
+    <div class="self-gear-item">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700">${g.label}</div>
+        <div style="font-size:11px;color:var(--text3)">$${g.price} / 件</div>
+        ${g.hasSize ? `<input class="inp" id="sg_size_${g.key}" placeholder="尺寸（如：M）" style="margin-top:5px;font-size:12px;padding:6px 10px" value="${selfGearEdit[g.key+'Size']||''}" oninput="selfGearEdit.${g.key}Size=this.value">` : ''}
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button class="qty-btn" onclick="adjSelfGear('${g.key}',-1)">−</button>
+        <span class="qty-val" id="sg_qty_${g.key}">${selfGearEdit[g.key]||0}</span>
+        <button class="qty-btn" onclick="adjSelfGear('${g.key}',1)">+</button>
+      </div>
+    </div>`).join('')}
+    <div class="self-gear-item">
+      <div style="flex:1">
+        <input class="inp" id="sg_customName" placeholder="自訂品項名稱" style="font-size:12px;padding:6px 10px" value="${selfGearEdit.customName||''}" oninput="selfGearEdit.customName=this.value">
+        <input class="inp" type="number" id="sg_customPrice" placeholder="單價" style="font-size:12px;padding:6px 10px;margin-top:5px;width:100px" value="${selfGearEdit.customPrice||''}" oninput="selfGearEdit.customPrice=parseInt(this.value)||0">
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button class="qty-btn" onclick="adjSelfGear('custom',-1)">−</button>
+        <span class="qty-val" id="sg_qty_custom">${selfGearEdit.custom||0}</span>
+        <button class="qty-btn" onclick="adjSelfGear('custom',1)">+</button>
+      </div>
+    </div>
+    <div class="ig" style="margin-top:8px">
+      <label class="lbl">匯款後5碼（付款後填寫）</label>
+      <input class="inp" id="sg_last5" placeholder="如：12345" maxlength="8" style="font-family:monospace;letter-spacing:2px" value="${selfGearEdit.last5||''}" oninput="selfGearEdit.last5=this.value">
+    </div>`;
+
+  // 繳費狀態
+  const period = currentPeriod();
+  const feeKey = `${name}__${period}`;
+  const f = fees[feeKey]||{};
+  document.getElementById('self-fee-info').innerHTML = `
+    <div class="self-fee-card">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:6px">${periodLabel(period)}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:15px;font-weight:700">${name}</span>
+        <span class="fee-badge ${f.paid?'fb-paid':'fb-unpaid'}">${f.paid?`✅ 已繳 $${f.amount||fees._feeAmt||2500}`:`尚未繳費 ─ $${fees._feeAmt||2500}`}</span>
+      </div>
+      ${f.paid ? `<div style="font-size:11px;color:var(--text3);margin-top:5px">繳費日期：${f.date||'—'}　後5碼：${f.last5||'—'}</div>` : 
+        `<div style="font-size:11px;color:var(--text2);margin-top:8px;line-height:1.7">請將隊費匯至帳戶後，<br>通知總務並提供帳號後5碼對帳</div>`}
+    </div>`;
+}
+
+function adjSelfGear(key, delta) {
+  selfGearEdit[key] = Math.max(0, (selfGearEdit[key]||0) + delta);
+  const el = document.getElementById('sg_qty_'+key);
+  if(el) el.textContent = selfGearEdit[key];
+}
+
+function saveSelfGear() {
+  const name = lookupName; if(!name){toast('請先查詢名字');return;}
+  const items = [];
+  ['uniform','life','pad'].forEach(k=>{
+    const labels={uniform:'隊服',life:'救生衣',pad:'屁墊'};
+    if((selfGearEdit[k]||0)>0) {
+      items.push({type:labels[k], qty:selfGearEdit[k], size:selfGearEdit[k+'Size']||'', price:gearPrices[k]||0});
+    }
+  });
+  if((selfGearEdit.custom||0)>0 && selfGearEdit.customName) {
+    items.push({type:selfGearEdit.customName, qty:selfGearEdit.custom, size:'', price:selfGearEdit.customPrice||0});
+  }
+  if(!items.length){toast('請至少選一項裝備');return;}
+  const id = 'go'+Date.now();
+  gearOrders[id] = {name, items, status:'pending', date:new Date().toISOString().slice(0,10), last5:selfGearEdit.last5||''};
+  save(); toast(`✅ 訂單已送出！總務確認後將更新狀態`);
+  selfGearEdit = {_name:name, uniform:0, life:0, pad:0, uniformSize:'', custom:0, customName:'', customPrice:0};
+  renderSelfSections(name);
+}
+
+// ─── txn Calendar ─────────────────────────────────────────────────
+function toggleTxnCal(){
+  const p=document.getElementById('txnCalPopup');
+  if(p.classList.contains('hidden')){renderTxnCalendar();p.classList.remove('hidden');}
+  else p.classList.add('hidden');
+}
+function txnCalNav(dir){txnCalMonth+=dir;if(txnCalMonth>11){txnCalMonth=0;txnCalYear++;}if(txnCalMonth<0){txnCalMonth=11;txnCalYear--;}renderTxnCalendar();}
+function renderTxnCalendar(){
+  const today=new Date();
+  document.getElementById('txnCalMonthLbl').textContent=`${txnCalYear} 年 ${txnCalMonth+1} 月`;
+  const dows=document.getElementById('txnCalDows');
+  dows.innerHTML=WEEKDAYS.map((d,i)=>`<div class="cal-dow ${i===0?'sun':i===6?'sat':''}">${d}</div>`).join('');
+  const firstDay=new Date(txnCalYear,txnCalMonth,1).getDay(), lastDate=new Date(txnCalYear,txnCalMonth+1,0).getDate();
+  let html=''; for(let i=0;i<firstDay;i++)html+=`<div class="cal-day cal-empty"></div>`;
+  for(let d=1;d<=lastDate;d++){
+    const isToday=today.getFullYear()===txnCalYear&&today.getMonth()===txnCalMonth&&today.getDate()===d;
+    const dow=new Date(txnCalYear,txnCalMonth,d).getDay();
+    const isSel=txnCalSelDate&&txnCalSelDate.y===txnCalYear&&txnCalSelDate.m===txnCalMonth&&txnCalSelDate.d===d;
+    const cls=['cal-day',dow===0?'cal-sun':'',dow===6?'cal-sat':'',isToday?'cal-today':'',isSel?'cal-selected':''].filter(Boolean).join(' ');
+    html+=`<div class="${cls}" onclick="pickTxnDay(${d})">${d}</div>`;
+  }
+  document.getElementById('txnCalDays').innerHTML=html;
+}
+function pickTxnDay(d){
+  txnCalSelDate={y:txnCalYear,m:txnCalMonth,d};
+  const dateStr=`${txnCalYear}/${txnCalMonth+1}/${d}`;
+  const dateIso=`${txnCalYear}-${String(txnCalMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  document.getElementById('txnDateDisplay').value=dateStr;
+  document.getElementById('txnDateVal').value=dateIso;
+  document.getElementById('txnCalPopup').classList.add('hidden');
+}
+// ── Finance module end ──────────────────────────────────────────────
+
+
+function diagData(){
+  const out = document.getElementById('diag-out');
+  out.style.display = 'block';
+  out.textContent = '讀取中...';
+  window._fbLoad().then(d=>{
+    if(!d){out.textContent='Firebase 回傳 NULL\n可能離線或資料庫為空';return;}
+    const aKeys=Object.keys(d.a||{});
+    const aOn=aKeys.filter(k=>{const v=d.a[k];return v===true||(v&&v.on===true);});
+    const hasBar=aKeys.some(k=>k.includes('||'));
+    const hasDbl=aKeys.some(k=>k.includes('__'));
+    let txt = '=== Firebase 原始資料 ===\n';
+    txt += `場次數：${(d.s||[]).length}\n`;
+    txt += `隊員數：${(d.m||[]).length}\n`;
+    txt += `出席記錄數：${aKeys.length}（已勾選：${aOn.length}）\n`;
+    txt += `Key格式：${hasBar?'|| 編碼':''} ${hasDbl?'__ 直接':''}\n`;
+    txt += `前3筆Key：${aKeys.slice(0,3).join(' | ')}\n`;
+    txt += `\n=== 記憶體狀態 ===\n`;
+    txt += `att keys：${Object.keys(att).length}\n`;
+    txt += `att on：${Object.keys(att).filter(k=>{const v=att[k];return v===true||(v&&v.on===true);}).length}\n`;
+    txt += `前3筆：${Object.keys(att).slice(0,3).join(' | ')}\n`;
+    txt += `時間戳：${d.ts?new Date(d.ts).toLocaleString():'無'}`;
+    out.textContent = txt;
+  }).catch(e=>{ out.textContent='錯誤：'+e.message; });
+}
+
+function escH(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ─── Calendar ────────────────────────────────────────────────────
+function toggleCal(){const p=document.getElementById('calPopup');if(p.classList.contains('hidden')){renderCalendar();p.classList.remove('hidden');}else p.classList.add('hidden');}
+function calNav(dir){calMonth+=dir;if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}renderCalendar();}
+function renderCalendar(){
+  const today=new Date(); document.getElementById('calMonthLbl').textContent=`${calYear} 年 ${calMonth+1} 月`;
+  const dows=document.getElementById('calDows');
+  dows.innerHTML=WEEKDAYS.map((d,i)=>`<div class="cal-dow ${i===0?'sun':i===6?'sat':''}">${d}</div>`).join('');
+  const firstDay=new Date(calYear,calMonth,1).getDay(), lastDate=new Date(calYear,calMonth+1,0).getDate();
+  let html=''; for(let i=0;i<firstDay;i++)html+=`<div class="cal-day cal-empty"></div>`;
+  for(let d=1;d<=lastDate;d++){
+    const isToday=today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===d;
+    const dow=new Date(calYear,calMonth,d).getDay();
+    const isSel=calSelDate&&calSelDate.y===calYear&&calSelDate.m===calMonth&&calSelDate.d===d;
+    const cls=['cal-day',dow===0?'cal-sun':'',dow===6?'cal-sat':'',isToday?'cal-today':'',isSel?'cal-selected':''].filter(Boolean).join(' ');
+    html+=`<div class="${cls}" onclick="pickDay(${d})">${d}</div>`;
+  }
+  document.getElementById('calDays').innerHTML=html;
+}
+function pickDay(d){
+  calSelDate={y:calYear,m:calMonth,d}; const dow=new Date(calYear,calMonth,d).getDay();
+  const dateStr=`${calYear}/${calMonth+1}/${d}（${WEEKDAYS[dow]}）`;
+  document.getElementById('newDateDisplay').value=dateStr; document.getElementById('newDateVal').value=dateStr;
+  document.getElementById('calPopup').classList.add('hidden');
+}
+function handleTimeSel(){const v=document.getElementById('newTimeSel').value;document.getElementById('timeCustom').classList[v==='other'?'remove':'add']('hidden');}
+
+// ─── App init ────────────────────────────────────────────────────
+function initApp(){
+  sessions=SSEED; members=[]; att={}; boatAsgn={}; published={}; fees={}; gearOrders={}; transactions=[]; gearPrices={uniform:380,life:950,pad:180};
+  document.getElementById('loadingMsg').textContent='載入資料中...';
+  document.addEventListener('click',e=>{
+    ['calPopup','txnCalPopup'].forEach(pid=>{
+      const popup=document.getElementById(pid);
+      const wrap=popup?.closest('.cal-wrap');
+      if(popup&&!popup.classList.contains('hidden')&&!wrap?.contains(e.target))popup.classList.add('hidden');
+    });
+  });
+  function showApp(){
+    const now=new Date();
+    const nowMK=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    const mks=allMonthKeys();
+    curMonthKey=mks.includes(nowMK)?nowMK:(mks[mks.length-1]||nowMK);
+    document.getElementById('loadingScreen').style.display='none';
+    document.getElementById('root').style.display='flex';
+    const ra=localStorage.getItem('v7:ra');
+    if(ra===ADMIN_PW) applyRole('admin');
+    else renderMember();
+    window._fbListen(d=>{if(_ignoreFbUpdate)return;fromCloudData(d);renderCur();});
+  }
+  // 等 Firebase 載入完才顯示，避免先顯示空白再跳
+  window._fbLoad().then(d=>{
+    if(d && (d.s||d.m||d.a)){
+      // 有資料才載入，絕不用空物件覆蓋
+      fromCloudData(d);
+    }
+    // 無論有無資料都顯示 app
+    window._setSyncStatus('ok');
+    showApp();
+  }).catch(()=>{
+    // 網路失敗：用 SSEED 離線模式顯示
+    window._setSyncStatus('offline');
+    showApp();
+  });
+}
+initApp();
+</script>
+</body>
+</html>
