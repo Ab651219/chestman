@@ -1752,8 +1752,8 @@ function renderActivitiesCaptain(){
             <div style="text-align:right;flex-shrink:0">
               <div style="font-size:13px;font-weight:900;color:var(--accent)">$${activityOrderTotal(o).toLocaleString()}</div>
               <span class="badge ${o.status==='paid'?'b-green':'b-orange'}">${o.status==='paid'?'✅ 已收款':'⏳ 待確認'}</span>
-              <button onclick="openActCfm('${id}')" style="display:block;margin-top:4px;background:var(--green);color:#fff;border:none;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">確認</button>
-              <button onclick="delActOrder('${id}')" style="display:block;margin-top:4px;background:transparent;border:none;color:var(--red);font-size:11px;cursor:pointer;padding:0">🗑 刪除</button>
+              <button onclick="openActCfm('${id}')" style="display:block;margin-top:6px;background:var(--green);color:#fff;border:none;padding:4px 9px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">確認</button>
+              <button onclick="delActOrder('${id}')" style="display:block;margin-top:12px;background:transparent;border:none;color:var(--text3);font-size:10px;cursor:pointer;padding:0">🗑 刪除</button>
             </div>
           </div>`).join(''):'<div style="text-align:center;color:var(--text3);padding:10px;font-size:12px">尚無人報名</div>'}
         <div style="display:flex;gap:6px;margin-top:8px">
@@ -1843,7 +1843,11 @@ function delActivity(id){
   save();renderCaptain();renderTreasurer();toast('已刪除');
 }
 function delActOrder(id){
-  if(!confirm('確定刪除此筆報名？'))return;
+  const o=activityOrders[id];
+  if(!o){toast('找不到此筆報名');return;}
+  const a=activities.find(x=>x.id===o.activityId);
+  const msg=`確定刪除這筆報名嗎？\n\n姓名：${o.name}\n活動：${a?a.title:'（活動已刪除）'}\n金額：$${activityOrderTotal(o).toLocaleString()}\n\n刪除後無法復原。`;
+  if(!confirm(msg))return;
   delete activityOrders[id];
   transactions=transactions.filter(t=>t.id!==`act__${id}`);
   save();renderCaptain();renderTreasurer();toast('已刪除');
@@ -2065,8 +2069,8 @@ function renderActivityAcc(){
       </div>
       <div style="text-align:right;flex-shrink:0">
         <div style="font-size:14px;font-weight:900;color:var(--accent)">$${activityOrderTotal(o).toLocaleString()}</div>
-        <button onclick="openActCfm('${id}')" style="margin-top:4px;background:var(--green);color:#fff;border:none;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">確認收款</button>
-        <button onclick="delActOrder('${id}')" style="display:block;margin-top:4px;background:transparent;border:none;color:var(--red);font-size:11px;cursor:pointer;padding:2px 4px">🗑 刪除</button>
+        <button onclick="openActCfm('${id}')" style="margin-top:6px;background:var(--green);color:#fff;border:none;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;display:block">確認收款</button>
+        <button onclick="delActOrder('${id}')" style="display:block;margin-top:12px;background:transparent;border:none;color:var(--text3);font-size:10px;cursor:pointer;padding:2px 4px">🗑 刪除</button>
       </div>
     </div>`).join('');
   }
@@ -2082,8 +2086,8 @@ function renderActivityAcc(){
       <div style="text-align:right;flex-shrink:0">
         <div style="font-size:13px;font-weight:700;color:var(--accent)">$${activityOrderTotal(o).toLocaleString()}</div>
         <span class="badge b-green">✅ 已收款</span>
-        <button onclick="openActCfm('${id}')" style="display:block;margin-top:4px;background:var(--bg3);border:1.5px solid var(--border);color:var(--text2);padding:3px 8px;border-radius:6px;font-size:11px;cursor:pointer">修改</button>
-        <button onclick="delActOrder('${id}')" style="display:block;margin-top:4px;background:transparent;border:none;color:var(--red);font-size:11px;cursor:pointer;padding:2px 0">🗑 刪除</button>
+        <button onclick="openActCfm('${id}')" style="display:block;margin-top:6px;background:var(--bg3);border:1.5px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer">修改</button>
+        <button onclick="delActOrder('${id}')" style="display:block;margin-top:12px;background:transparent;border:1.5px solid transparent;color:var(--text3);font-size:10px;cursor:pointer;padding:2px 4px">🗑 刪除</button>
       </div>
     </div>`).join('');
   }
